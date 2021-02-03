@@ -44,7 +44,7 @@ func TestBuildBinaries(t *testing.T) {
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
-						Args: []string{"build", "-o", "out/dir/lambdas/path1", "./lambdas/path1"},
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/path1", "./lambdas/path1"},
 
 						EnvVars: map[string]string{
 							"GOOS":   "linux",
@@ -56,7 +56,7 @@ func TestBuildBinaries(t *testing.T) {
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
-						Args: []string{"build", "-o", "out/dir/lambdas/path2", "./lambdas/path2"},
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/path2", "./lambdas/path2"},
 
 						EnvVars: map[string]string{
 							"GOOS":   "linux",
@@ -80,7 +80,7 @@ func TestBuildBinaries(t *testing.T) {
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
-						Args: []string{"build", "-o", "tmp/lambdas/path1", "./lambdas/path1"},
+						Args: []string{"build", "-trimpath", "-o", "tmp/lambdas/path1", "./lambdas/path1"},
 
 						EnvVars: map[string]string{
 							"GOOS":   "linux",
@@ -92,7 +92,7 @@ func TestBuildBinaries(t *testing.T) {
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
-						Args: []string{"build", "-o", "tmp/lambdas/path2", "./lambdas/path2"},
+						Args: []string{"build", "-trimpath", "-o", "tmp/lambdas/path2", "./lambdas/path2"},
 
 						EnvVars: map[string]string{
 							"GOOS":   "linux",
@@ -118,7 +118,7 @@ func TestBuildBinaries(t *testing.T) {
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
-						Args: []string{"build", "-o", "out/dir/lambdas/path1", "./lambdas/path1"},
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/path1", "./lambdas/path1"},
 
 						EnvVars: map[string]string{
 							"GOOS":   "linux",
@@ -143,7 +143,7 @@ func TestBuildBinaries(t *testing.T) {
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
-						Args: []string{"build", "-o", "out/dir/lambdas/path1", "./lambdas/path1"},
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/path1", "./lambdas/path1"},
 
 						EnvVars: map[string]string{
 							"GOOS":   "linux",
