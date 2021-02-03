@@ -1,0 +1,16 @@
+mocks:
+  packages:
+    - path: bursavich.dev/fs-shim/io/fs
+      interfaces: [ReadFileFS]
+
+    - path: github.com/JosiahWitt/lambgo/internal/runcmd
+      interfaces: [RunnerAPI]
+
+    - path: github.com/JosiahWitt/lambgo/internal/zipper
+      interfaces: [ZipAPI]
+
+    - path: github.com/JosiahWitt/lambgo/internal/lambgofile
+      interfaces: [LoaderAPI]
+
+    - path: github.com/JosiahWitt/lambgo/internal/builder
+      interfaces: [LambdaBuilderAPI]

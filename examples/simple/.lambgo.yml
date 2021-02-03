@@ -1,0 +1,9 @@
+# Directory to use as the root for build artifacts.
+# Optional, defaults to tmp.
+outDirectory: tmp
+
+# Paths to build into Lambda zip files.
+# Each path should contain a main package.
+# The artifacts are built to: <outDirectory>/<buildPath>.zip
+buildPaths:
+  - lambdas/hello_world
