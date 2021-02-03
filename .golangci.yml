@@ -1,0 +1,29 @@
+linters:
+  enable-all: true
+  fast: false
+  disable:
+    - maligned
+    - prealloc
+    - wsl
+    - nlreturn
+    - wrapcheck
+    - godox
+    - exhaustivestruct
+
+linters-settings:
+  lll:
+    line-length: 160
+
+issues:
+  exclude-rules:
+    # Exclude some linters from tests
+    - path: _test\.go
+      linters:
+        - funlen
+        - lll
+        - goconst
+        - goerr113
+        - dupl
+        - paralleltest
+        - exhaustivestruct
+        - gocognit
