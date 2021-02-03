@@ -51,7 +51,7 @@ func (b *LambdaBuilder) buildBinary(config *lambgofile.Config, buildPath string)
 	_, err := b.Cmd.Exec(&runcmd.ExecParams{
 		PWD:  config.RootPath,
 		CMD:  "go",
-		Args: []string{"build", "-o", outPath, "./" + buildPath},
+		Args: []string{"build", "-trimpath", "-o", outPath, "./" + buildPath},
 
 		EnvVars: map[string]string{
 			"GOOS":   "linux",
