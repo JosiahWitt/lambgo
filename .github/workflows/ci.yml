@@ -47,3 +47,27 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.34.1
+
+
+  regression-test:
+    name: Regression Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [1.14, 1.15]
+
+    steps:
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: Install lambgo
+        run: go install ./cmd/lambgo
+
+      # TODO: Improve checks. For now just ensure we can build.
+      - name: Build simple example
+        run: (cd examples/simple; lambgo build)
