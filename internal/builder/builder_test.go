@@ -2,6 +2,8 @@ package builder_test
 
 import (
 	"errors"
+	"io/ioutil"
+	"log"
 	"testing"
 
 	"github.com/JosiahWitt/ensure"
@@ -27,9 +29,9 @@ func TestBuildBinaries(t *testing.T) {
 		Config        *lambgofile.Config
 		ExpectedError error
 
-		Mocks      *Mocks
-		SetupMocks func(*Mocks)
-		Subject    *builder.LambdaBuilder
+		Mocks         *Mocks
+		AssembleMocks func(*Mocks) []*gomock.Call
+		Subject       *builder.LambdaBuilder
 	}{
 		{
 			Name: "with valid config",
@@ -39,8 +41,8 @@ func TestBuildBinaries(t *testing.T) {
 				BuildPaths:   []string{"lambdas/path1", "lambdas/path2"},
 			},
 
-			SetupMocks: func(m *Mocks) {
-				gomock.InOrder(
+			AssembleMocks: func(m *Mocks) []*gomock.Call {
+				return []*gomock.Call{
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
@@ -64,7 +66,7 @@ func TestBuildBinaries(t *testing.T) {
 						},
 					}).Return("", nil),
 					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path2").Return(nil),
-				)
+				}
 			},
 		},
 
@@ -75,8 +77,8 @@ func TestBuildBinaries(t *testing.T) {
 				BuildPaths: []string{"lambdas/path1", "lambdas/path2"},
 			},
 
-			SetupMocks: func(m *Mocks) {
-				gomock.InOrder(
+			AssembleMocks: func(m *Mocks) []*gomock.Call {
+				return []*gomock.Call{
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
@@ -100,7 +102,7 @@ func TestBuildBinaries(t *testing.T) {
 						},
 					}).Return("", nil),
 					m.Zip.EXPECT().ZipFile("tmp/lambdas/path2").Return(nil),
-				)
+				}
 			},
 		},
 
@@ -113,8 +115,8 @@ func TestBuildBinaries(t *testing.T) {
 			},
 			ExpectedError: builder.ErrGoBuildFailed,
 
-			SetupMocks: func(m *Mocks) {
-				gomock.InOrder(
+			AssembleMocks: func(m *Mocks) []*gomock.Call {
+				return []*gomock.Call{
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
@@ -124,8 +126,19 @@ func TestBuildBinaries(t *testing.T) {
 							"GOOS":   "linux",
 							"GOARCH": "amd64",
 						},
-					}).Return("", errors.New("something is wrong")),
-				)
+					}).Return("", errors.New("something is wrong 1")),
+
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/path2", "./lambdas/path2"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", errors.New("something is wrong 2")),
+				}
 			},
 		},
 
@@ -138,8 +151,8 @@ func TestBuildBinaries(t *testing.T) {
 			},
 			ExpectedError: builder.ErrZipFailed,
 
-			SetupMocks: func(m *Mocks) {
-				gomock.InOrder(
+			AssembleMocks: func(m *Mocks) []*gomock.Call {
+				return []*gomock.Call{
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
@@ -150,16 +163,45 @@ func TestBuildBinaries(t *testing.T) {
 							"GOARCH": "amd64",
 						},
 					}).Return("", nil),
-					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path1").Return(errors.New("something went wrong")),
-				)
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path1").Return(errors.New("something went wrong 1")),
+
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/path2", "./lambdas/path2"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", nil),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path2").Return(errors.New("something went wrong 2")),
+				}
 			},
 		},
 	}
 
-	ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
-		entry := table[i]
+	ensure.Run("when parallel mode disabled", func(ensure ensurepkg.Ensure) {
+		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
+			entry := table[i]
+			entry.Subject.Logger = log.New(ioutil.Discard, "", 0)
+			entry.Config.DisableParallelBuild = true
+			gomock.InOrder(entry.AssembleMocks(entry.Mocks)...)
 
-		err := entry.Subject.BuildBinaries(entry.Config)
-		ensure(err).IsError(entry.ExpectedError)
+			err := entry.Subject.BuildBinaries(entry.Config)
+			ensure(err).IsError(err)
+		})
+	})
+
+	ensure.Run("when parallel mode enabled", func(ensure ensurepkg.Ensure) {
+		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
+			entry := table[i]
+			entry.Subject.Logger = log.New(ioutil.Discard, "", 0)
+			entry.Config.DisableParallelBuild = false
+			entry.AssembleMocks(entry.Mocks)
+
+			err := entry.Subject.BuildBinaries(entry.Config)
+			ensure(err).IsError(err)
+		})
 	})
 }

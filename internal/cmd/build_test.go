@@ -28,6 +28,7 @@ func TestBuild(t *testing.T) {
 	table := []struct {
 		Name          string
 		ExpectedError error
+		Flags         []string
 
 		Getwd      func() (string, error)
 		Mocks      *Mocks
@@ -47,6 +48,26 @@ func TestBuild(t *testing.T) {
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
 						RootPath: "/some/root/path",
+					}).
+					Return(nil)
+			},
+		},
+
+		{
+			Name:  "with valid execution: disable parallel generation",
+			Flags: []string{"--disable-parallel"},
+			Getwd: defaultWd,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath: "/some/root/path",
+					}, nil)
+
+				m.Builder.EXPECT().
+					BuildBinaries(&lambgofile.Config{
+						DisableParallelBuild: true,
+						RootPath:             "/some/root/path",
 					}).
 					Return(nil)
 			},
@@ -91,7 +112,7 @@ func TestBuild(t *testing.T) {
 		entry := table[i]
 		entry.Subject.Getwd = entry.Getwd
 
-		err := entry.Subject.Run([]string{"lambgo", "build"})
+		err := entry.Subject.Run(append([]string{"lambgo", "build"}, entry.Flags...))
 		ensure(err).IsError(entry.ExpectedError)
 	})
 }
