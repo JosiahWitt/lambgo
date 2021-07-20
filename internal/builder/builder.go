@@ -106,7 +106,12 @@ func (b *LambdaBuilder) buildBinary(config *lambgofile.Config, buildPath string)
 		})
 	}
 
-	if err := b.Zip.ZipFile(outPath); err != nil {
+	zippedFileName := filepath.Base(outPath)
+	if config.ZippedFileName != "" {
+		zippedFileName = config.ZippedFileName
+	}
+
+	if err := b.Zip.ZipFile(outPath, zippedFileName); err != nil {
 		return erk.WrapWith(ErrZipFailed, err, erk.Params{
 			"buildPath": buildPath,
 		})

@@ -27,6 +27,7 @@ func TestZipFile(t *testing.T) {
 		ensure(err).IsNotError()
 
 		const fileName = "test-file.txt"
+		const zippedFileName = "test-file-zipped.txt"
 		path := filepath.Join(dir, fileName)
 		outDir := filepath.Join(dir, "out")
 		zipPath := path + ".zip"
@@ -37,7 +38,7 @@ func TestZipFile(t *testing.T) {
 
 		// Zip file
 		z := zipper.Zip{}
-		err = z.ZipFile(path)
+		err = z.ZipFile(path, zippedFileName)
 		ensure(err).IsNotError()
 
 		// Ensure zip file was compressed
@@ -51,7 +52,7 @@ func TestZipFile(t *testing.T) {
 		ensure(err).IsNotError()
 
 		// Ensure unzipped file equals original
-		outPath := filepath.Join(outDir, fileName)
+		outPath := filepath.Join(outDir, zippedFileName)
 		data, err := ioutil.ReadFile(outPath)
 		ensure(err).IsNotError()
 		ensure(string(data)).Equals(sampleFile)
