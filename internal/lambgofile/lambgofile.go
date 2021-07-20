@@ -17,6 +17,11 @@ const ExampleFile = `# Directory to use as the root for build artifacts.
 # Optional, defaults to tmp.
 outDirectory: tmp
 
+# File name to use for all zipped binaries.
+# Useful when using provided.al2 instead of go1.x for the Lambda runtime.
+# Optional, defaults to the name of the Lambda's directory.
+# zippedFileName: bootstrap
+
 # Paths to build into Lambda zip files.
 # Each path should contain a main package.
 # The artifacts are built to: <outDirectory>/<buildPath>.zip
@@ -55,8 +60,9 @@ type Config struct {
 	RootPath             string `yaml:"-"`
 	ModulePath           string `yaml:"-"`
 
-	OutDirectory string   `yaml:"outDirectory"`
-	BuildPaths   []string `yaml:"buildPaths"`
+	OutDirectory   string   `yaml:"outDirectory"`
+	ZippedFileName string   `yaml:"zippedFileName"`
+	BuildPaths     []string `yaml:"buildPaths"`
 }
 
 // LoadConfig from the .lambgo.yml file that is located in pwd or a parent of pwd.

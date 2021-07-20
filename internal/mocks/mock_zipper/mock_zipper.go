@@ -34,17 +34,17 @@ func (m *MockZipAPI) EXPECT() *MockZipAPIMockRecorder {
 }
 
 // ZipFile mocks base method.
-func (m *MockZipAPI) ZipFile(arg0 string) error {
+func (m *MockZipAPI) ZipFile(arg0, arg1 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ZipFile", arg0)
+	ret := m.ctrl.Call(m, "ZipFile", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // ZipFile indicates an expected call of ZipFile.
-func (mr *MockZipAPIMockRecorder) ZipFile(arg0 interface{}) *gomock.Call {
+func (mr *MockZipAPIMockRecorder) ZipFile(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZipFile", reflect.TypeOf((*MockZipAPI)(nil).ZipFile), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZipFile", reflect.TypeOf((*MockZipAPI)(nil).ZipFile), arg0, arg1)
 }
 
 // NEW creates a MockZipAPI.

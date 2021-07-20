@@ -53,7 +53,7 @@ func TestBuildBinaries(t *testing.T) {
 							"GOARCH": "amd64",
 						},
 					}).Return("", nil),
-					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path1").Return(nil),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path1", "path1").Return(nil),
 
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
@@ -65,7 +65,7 @@ func TestBuildBinaries(t *testing.T) {
 							"GOARCH": "amd64",
 						},
 					}).Return("", nil),
-					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path2").Return(nil),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path2", "path2").Return(nil),
 				}
 			},
 		},
@@ -89,7 +89,7 @@ func TestBuildBinaries(t *testing.T) {
 							"GOARCH": "amd64",
 						},
 					}).Return("", nil),
-					m.Zip.EXPECT().ZipFile("tmp/lambdas/path1").Return(nil),
+					m.Zip.EXPECT().ZipFile("tmp/lambdas/path1", "path1").Return(nil),
 
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
@@ -101,7 +101,44 @@ func TestBuildBinaries(t *testing.T) {
 							"GOARCH": "amd64",
 						},
 					}).Return("", nil),
-					m.Zip.EXPECT().ZipFile("tmp/lambdas/path2").Return(nil),
+					m.Zip.EXPECT().ZipFile("tmp/lambdas/path2", "path2").Return(nil),
+				}
+			},
+		},
+		{
+			Name: "with valid config with zippedFileName",
+			Config: &lambgofile.Config{
+				RootPath:       "/my/root",
+				OutDirectory:   "out/dir",
+				ZippedFileName: "bootstrap",
+				BuildPaths:     []string{"lambdas/path1", "lambdas/path2"},
+			},
+
+			AssembleMocks: func(m *Mocks) []*gomock.Call {
+				return []*gomock.Call{
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/path1", "./lambdas/path1"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", nil),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path1", "bootstrap").Return(nil),
+
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/path2", "./lambdas/path2"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", nil),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path2", "bootstrap").Return(nil),
 				}
 			},
 		},
@@ -163,7 +200,7 @@ func TestBuildBinaries(t *testing.T) {
 							"GOARCH": "amd64",
 						},
 					}).Return("", nil),
-					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path1").Return(errors.New("something went wrong 1")),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path1", "path1").Return(errors.New("something went wrong 1")),
 
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
@@ -175,7 +212,7 @@ func TestBuildBinaries(t *testing.T) {
 							"GOARCH": "amd64",
 						},
 					}).Return("", nil),
-					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path2").Return(errors.New("something went wrong 2")),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path2", "path2").Return(errors.New("something went wrong 2")),
 				}
 			},
 		},

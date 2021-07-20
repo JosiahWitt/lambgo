@@ -87,6 +87,25 @@ func TestLoadConfig(t *testing.T) {
 		},
 
 		{
+			Name: "with valid config including zippedFileName",
+			PWD:  "/my/app",
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:       "/my/app",
+				ModulePath:     "github.com/my/app",
+				ZippedFileName: "some-name",
+				OutDirectory:   "tmp",
+				BuildPaths:     []string{"lambdas/hello_world"},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+zippedFileName: some-name
+` + lambgofile.ExampleFile,
+			}),
+		},
+
+		{
 			Name:          "when missing go.mod file",
 			PWD:           "/my/app",
 			ExpectedError: lambgofile.ErrCannotFindGoModule,
