@@ -106,6 +106,26 @@ zippedFileName: some-name
 		},
 
 		{
+			Name: "with valid config including buildFlags",
+			PWD:  "/my/app",
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:      "/my/app",
+				ModulePath:    "github.com/my/app",
+				RawBuildFlags: `-foo -bar "baz qux"`,
+				BuildFlags:    []string{"-foo", "-bar", "baz qux"},
+				OutDirectory:  "tmp",
+				BuildPaths:    []string{"lambdas/hello_world"},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+buildFlags: -foo -bar "baz qux"
+` + lambgofile.ExampleFile,
+			}),
+		},
+
+		{
 			Name:          "when missing go.mod file",
 			PWD:           "/my/app",
 			ExpectedError: lambgofile.ErrCannotFindGoModule,
@@ -166,6 +186,17 @@ zippedFileName: some-name
 			SetupMocks: setupMapFS(mapFS{
 				"my/app/go.mod":      defaultGoModFile,
 				"my/app/.lambgo.yml": "{{{{{{ Not YAML",
+			}),
+		},
+
+		{
+			Name:          "when .lambgo.yml file has bad flag syntax",
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrCannotParseFlags,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod":      defaultGoModFile,
+				"my/app/.lambgo.yml": "buildFlags: foo'",
 			}),
 		},
 	}
