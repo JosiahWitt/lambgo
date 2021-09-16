@@ -105,6 +105,44 @@ func TestBuildBinaries(t *testing.T) {
 				}
 			},
 		},
+
+		{
+			Name: "with valid config with build flags",
+			Config: &lambgofile.Config{
+				RootPath:   "/my/root",
+				BuildPaths: []string{"lambdas/path1", "lambdas/path2"},
+				BuildFlags: []string{"-extra", "-stuff"},
+			},
+
+			AssembleMocks: func(m *Mocks) []*gomock.Call {
+				return []*gomock.Call{
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "-trimpath", "-o", "tmp/lambdas/path1", "-extra", "-stuff", "./lambdas/path1"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", nil),
+					m.Zip.EXPECT().ZipFile("tmp/lambdas/path1", "path1").Return(nil),
+
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "-trimpath", "-o", "tmp/lambdas/path2", "-extra", "-stuff", "./lambdas/path2"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", nil),
+					m.Zip.EXPECT().ZipFile("tmp/lambdas/path2", "path2").Return(nil),
+				}
+			},
+		},
+
 		{
 			Name: "with valid config with zippedFileName",
 			Config: &lambgofile.Config{

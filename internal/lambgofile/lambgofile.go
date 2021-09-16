@@ -8,6 +8,7 @@ import (
 
 	"bursavich.dev/fs-shim/io/fs"
 	"github.com/JosiahWitt/erk"
+	"github.com/google/shlex"
 	"golang.org/x/mod/modfile"
 	"gopkg.in/yaml.v3"
 )
@@ -21,6 +22,10 @@ outDirectory: tmp
 # Useful when using provided.al2 instead of go1.x for the Lambda runtime.
 # Optional, defaults to the name of the Lambda's directory.
 # zippedFileName: bootstrap
+
+# Additional build flags passed to "go build"
+# For example, if you want to provide extra compiler or linker options
+# buildFlags: -tags extra,tags -ldflags="-linker -flags"
 
 # Paths to build into Lambda zip files.
 # Each path should contain a main package.
@@ -41,6 +46,7 @@ var (
 	ErrCannotParseGoModule = erk.New(ErkCannotLoadConfig{}, "Cannot read module path from go.mod file: {{.path}}")
 	ErrCannotOpenFile      = erk.New(ErkCannotLoadConfig{}, "Cannot open the file '{{.path}}': {{.err}}")
 	ErrCannotUnmarshalFile = erk.New(ErkCannotLoadConfig{}, "Cannot parse the file '{{.path}}': {{.err}}")
+	ErrCannotParseFlags    = erk.New(ErkCannotLoadConfig{}, "Cannot parse build flags '{{.flags}}': {{.err}}")
 )
 
 type LoaderAPI interface {
@@ -62,6 +68,8 @@ type Config struct {
 
 	OutDirectory   string   `yaml:"outDirectory"`
 	ZippedFileName string   `yaml:"zippedFileName"`
+	RawBuildFlags  string   `yaml:"buildFlags"`
+	BuildFlags     []string `yaml:"-"`
 	BuildPaths     []string `yaml:"buildPaths"`
 }
 
@@ -106,6 +114,17 @@ func (l *Loader) LoadConfig(pwd string) (*Config, error) {
 		return nil, erk.WrapWith(ErrCannotUnmarshalFile, err, erk.Params{
 			"path": configFilePath,
 		})
+	}
+
+	if config.RawBuildFlags != "" {
+		buildFlags, err := shlex.Split(config.RawBuildFlags)
+		if err != nil {
+			return nil, erk.WrapWith(ErrCannotParseFlags, err, erk.Params{
+				"flags": config.RawBuildFlags,
+			})
+		}
+
+		config.BuildFlags = buildFlags
 	}
 
 	config.RootPath = "/" + pwd

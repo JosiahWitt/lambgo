@@ -90,10 +90,14 @@ func (b *LambdaBuilder) buildBinaryAsync(config *lambgofile.Config, buildPath st
 func (b *LambdaBuilder) buildBinary(config *lambgofile.Config, buildPath string) error {
 	outPath := buildOutPath(config, buildPath)
 
+	fullArgs := []string{"build", "-trimpath", "-o", outPath}
+	fullArgs = append(fullArgs, config.BuildFlags...)
+	fullArgs = append(fullArgs, "./"+buildPath)
+
 	_, err := b.Cmd.Exec(&runcmd.ExecParams{
 		PWD:  config.RootPath,
 		CMD:  "go",
-		Args: []string{"build", "-trimpath", "-o", outPath, "./" + buildPath},
+		Args: fullArgs,
 
 		EnvVars: map[string]string{
 			"GOOS":   "linux",
