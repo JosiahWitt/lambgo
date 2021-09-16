@@ -42,6 +42,15 @@ Here is an example `.lambgo.yml` file:
 # Optional, defaults to tmp.
 outDirectory: tmp
 
+# File name to use for all zipped binaries.
+# Useful when using provided.al2 instead of go1.x for the Lambda runtime.
+# Optional, defaults to the name of the Lambda's directory.
+# zippedFileName: bootstrap
+
+# Additional build flags passed to "go build"
+# For example, if you want to provide extra compiler or linker options
+# buildFlags: -tags extra,tags -ldflags="-linker -flags"
+
 # Paths to build into Lambda zip files.
 # Each path should contain a main package.
 # The artifacts are built to: <outDirectory>/<buildPath>.zip
