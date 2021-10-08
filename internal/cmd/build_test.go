@@ -74,6 +74,27 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
+			Name:  "with valid execution: filter to only flag",
+			Flags: []string{"--only", "abc/123,xyz/456"},
+			Getwd: defaultWd,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"first/0", "abc/123", "xyz/456", "qwerty/789"},
+					}, nil)
+
+				m.Builder.EXPECT().
+					BuildBinaries(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"abc/123", "xyz/456"},
+					}).
+					Return(nil)
+			},
+		},
+
+		{
 			Name:          "when error loading working directory",
 			Getwd:         func() (string, error) { return "", exampleError },
 			ExpectedError: exampleError,
@@ -85,6 +106,21 @@ func TestBuild(t *testing.T) {
 			ExpectedError: exampleError,
 			SetupMocks: func(m *Mocks) {
 				m.LambgoFileLoader.EXPECT().LoadConfig("/test").Return(nil, exampleError)
+			},
+		},
+
+		{
+			Name:          "when cannot filter build paths",
+			Flags:         []string{"--only", "abc/123,does/not/exist"},
+			Getwd:         defaultWd,
+			ExpectedError: cmd.ErrCannotFilterBuildPaths,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"abc/123", "xyz/456"},
+					}, nil)
 			},
 		},
 
