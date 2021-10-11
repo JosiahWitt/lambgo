@@ -24,6 +24,19 @@ func TestBuildBinaries(t *testing.T) {
 		Zip *mock_zipper.MockZipAPI
 	}
 
+	mockBuildDependencies := func(m *Mocks, lambdaPaths ...string) *gomock.Call {
+		return m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+			PWD:  "/my/root",
+			CMD:  "go",
+			Args: append([]string{"build"}, lambdaPaths...),
+
+			EnvVars: map[string]string{
+				"GOOS":   "linux",
+				"GOARCH": "amd64",
+			},
+		}).Return("", nil)
+	}
+
 	table := []struct {
 		Name          string
 		Config        *lambgofile.Config
@@ -43,6 +56,8 @@ func TestBuildBinaries(t *testing.T) {
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
 				return []*gomock.Call{
+					mockBuildDependencies(m, "./lambdas/path1", "./lambdas/path2"),
+
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
@@ -79,6 +94,8 @@ func TestBuildBinaries(t *testing.T) {
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
 				return []*gomock.Call{
+					mockBuildDependencies(m, "./lambdas/path1", "./lambdas/path2"),
+
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
@@ -116,6 +133,8 @@ func TestBuildBinaries(t *testing.T) {
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
 				return []*gomock.Call{
+					mockBuildDependencies(m, "./lambdas/path1", "./lambdas/path2"),
+
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
@@ -154,6 +173,8 @@ func TestBuildBinaries(t *testing.T) {
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
 				return []*gomock.Call{
+					mockBuildDependencies(m, "./lambdas/path1", "./lambdas/path2"),
+
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
@@ -182,7 +203,32 @@ func TestBuildBinaries(t *testing.T) {
 		},
 
 		{
-			Name: "with error running go build",
+			Name: "with error running go build for the dependencies",
+			Config: &lambgofile.Config{
+				RootPath:     "/my/root",
+				OutDirectory: "out/dir",
+				BuildPaths:   []string{"lambdas/path1", "lambdas/path2"},
+			},
+			ExpectedError: builder.ErrGoBuildDependenciesFailed,
+
+			AssembleMocks: func(m *Mocks) []*gomock.Call {
+				return []*gomock.Call{
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "./lambdas/path1", "./lambdas/path2"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", errors.New("unable to build dependencies")),
+				}
+			},
+		},
+
+		{
+			Name: "with error running go build for a Lambda",
 			Config: &lambgofile.Config{
 				RootPath:     "/my/root",
 				OutDirectory: "out/dir",
@@ -192,6 +238,8 @@ func TestBuildBinaries(t *testing.T) {
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
 				return []*gomock.Call{
+					mockBuildDependencies(m, "./lambdas/path1", "./lambdas/path2"),
+
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
@@ -228,6 +276,8 @@ func TestBuildBinaries(t *testing.T) {
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
 				return []*gomock.Call{
+					mockBuildDependencies(m, "./lambdas/path1", "./lambdas/path2"),
+
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
