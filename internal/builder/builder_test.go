@@ -28,7 +28,7 @@ func TestBuildBinaries(t *testing.T) {
 		return m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 			PWD:  "/my/root",
 			CMD:  "go",
-			Args: append([]string{"build"}, lambdaPaths...),
+			Args: append([]string{"build", "-trimpath"}, lambdaPaths...),
 
 			EnvVars: map[string]string{
 				"GOOS":   "linux",
@@ -216,7 +216,7 @@ func TestBuildBinaries(t *testing.T) {
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
 						CMD:  "go",
-						Args: []string{"build", "./lambdas/path1", "./lambdas/path2"},
+						Args: []string{"build", "-trimpath", "./lambdas/path1", "./lambdas/path2"},
 
 						EnvVars: map[string]string{
 							"GOOS":   "linux",
