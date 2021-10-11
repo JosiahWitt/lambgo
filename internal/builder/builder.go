@@ -77,6 +77,12 @@ func (b *LambdaBuilder) BuildBinaries(config *lambgofile.Config) error {
 }
 
 func (b *LambdaBuilder) buildDependencies(config *lambgofile.Config) error {
+	// Skip building dependencies when there is only one Lambda, otherwise it will
+	// build the executable instead of only populating the build cache
+	if len(config.BuildPaths) < 2 { //nolint:gomnd
+		return nil
+	}
+
 	buildPaths := make([]string, 0, len(config.BuildPaths))
 	for _, buildPath := range config.BuildPaths {
 		buildPaths = append(buildPaths, "./"+buildPath)
