@@ -85,7 +85,7 @@ func (b *LambdaBuilder) buildDependencies(config *lambgofile.Config) error {
 	_, err := b.Cmd.Exec(&runcmd.ExecParams{
 		PWD:  config.RootPath,
 		CMD:  "go",
-		Args: append([]string{"build"}, buildPaths...),
+		Args: append([]string{"build", "-trimpath"}, buildPaths...),
 
 		EnvVars: map[string]string{
 			"GOOS":   "linux",
