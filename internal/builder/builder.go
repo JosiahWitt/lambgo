@@ -20,6 +20,8 @@ type (
 var (
 	ErrMultipleBuildFailures = erk.New(ErkMultipleFailures{}, "Unable to build at least one Lambda")
 
+	ErrGoBuildDependenciesFailed = erk.New(ErkBuildError{}, "Unable to build dependencies for all Lambdas with `go build`: {{.err}}")
+
 	ErrGoBuildFailed = erk.New(ErkBuildError{}, "Unable to build '{{.buildPath}}' with `go build`: {{.err}}")
 	ErrZipFailed     = erk.New(ErkBuildError{}, "Unable to zip '{{.buildPath}}' to '{{.buildPath}}.zip': {{.err}}")
 )
@@ -46,6 +48,12 @@ func (b *LambdaBuilder) BuildBinaries(config *lambgofile.Config) error {
 		errors: erg.NewAs(ErrMultipleBuildFailures),
 	}
 
+	b.Logger.Println("Building Lambda Dependencies...")
+	if err := b.buildDependencies(config); err != nil {
+		return err
+	}
+
+	b.Logger.Println()
 	b.Logger.Println("Building Lambdas:")
 	for _, buildPath := range config.BuildPaths {
 		if !config.DisableParallelBuild {
@@ -63,6 +71,29 @@ func (b *LambdaBuilder) BuildBinaries(config *lambgofile.Config) error {
 	asyncParams.wg.Wait()
 	if erg.Any(asyncParams.errors) {
 		return asyncParams.errors
+	}
+
+	return nil
+}
+
+func (b *LambdaBuilder) buildDependencies(config *lambgofile.Config) error {
+	buildPaths := make([]string, 0, len(config.BuildPaths))
+	for _, buildPath := range config.BuildPaths {
+		buildPaths = append(buildPaths, "./"+buildPath)
+	}
+
+	_, err := b.Cmd.Exec(&runcmd.ExecParams{
+		PWD:  config.RootPath,
+		CMD:  "go",
+		Args: append([]string{"build"}, buildPaths...),
+
+		EnvVars: map[string]string{
+			"GOOS":   "linux",
+			"GOARCH": "amd64",
+		},
+	})
+	if err != nil {
+		return erk.WrapAs(ErrGoBuildDependenciesFailed, err)
 	}
 
 	return nil
