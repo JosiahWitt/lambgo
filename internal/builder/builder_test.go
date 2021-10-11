@@ -203,6 +203,31 @@ func TestBuildBinaries(t *testing.T) {
 		},
 
 		{
+			Name: "with valid config with only one build path it does not build dependencies",
+			Config: &lambgofile.Config{
+				RootPath:     "/my/root",
+				OutDirectory: "out/dir",
+				BuildPaths:   []string{"lambdas/path1"},
+			},
+
+			AssembleMocks: func(m *Mocks) []*gomock.Call {
+				return []*gomock.Call{
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/path1", "./lambdas/path1"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", nil),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path1", "path1").Return(nil),
+				}
+			},
+		},
+
+		{
 			Name: "with error running go build for the dependencies",
 			Config: &lambgofile.Config{
 				RootPath:     "/my/root",
