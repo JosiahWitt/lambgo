@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/JosiahWitt/erk"
@@ -9,7 +10,10 @@ import (
 
 type ErkCannotFilterBuildPaths struct{ erk.DefaultKind }
 
-var ErrCannotFilterBuildPaths = erk.New(ErkCannotFilterBuildPaths{}, "Cannot filter build paths, since '{{.allowedPath}}' is not in: {{.buildPaths}}")
+var ErrCannotFilterBuildPaths = erk.New(ErkCannotFilterBuildPaths{},
+	"Cannot filter build paths with --only, since '{{.filter}}' does not match any of:\n{{.buildPaths}}"+
+		"\n\nRemember to end with a trailing `/` if you wish to match a directory.",
+)
 
 func (a *App) buildCmd() *cli.Command {
 	return &cli.Command{
@@ -21,9 +25,11 @@ func (a *App) buildCmd() *cli.Command {
 				Name:  "disable-parallel",
 				Usage: "Disables building in parallel",
 			},
-			&cli.StringFlag{
-				Name:  "only",
-				Usage: "Only build the provided comma-separated paths, instead of all the paths in .lambgo.yml",
+			&cli.StringSliceFlag{
+				Name: "only",
+				Usage: "Only build the provided `path`, instead of all the paths in .lambgo.yml. " +
+					"If you wish to build all Lambdas in a directory, you can provide a trailing `/`. " +
+					"This flag can be used multiple times to build multiple Lambdas (or Lambda directories).",
 			},
 		},
 
@@ -38,8 +44,8 @@ func (a *App) buildCmd() *cli.Command {
 				return err
 			}
 
-			if rawOnlyFlag := c.String("only"); rawOnlyFlag != "" {
-				filteredBuildPaths, err := filterBuildPaths(config.BuildPaths, rawOnlyFlag)
+			if rawOnlyFlags := c.StringSlice("only"); len(rawOnlyFlags) > 0 {
+				filteredBuildPaths, err := filterBuildPaths(config.BuildPaths, rawOnlyFlags)
 				if err != nil {
 					return err
 				}
@@ -53,21 +59,35 @@ func (a *App) buildCmd() *cli.Command {
 	}
 }
 
-func filterBuildPaths(buildPaths []string, filter string) ([]string, error) {
-	buildPathsMap := make(map[string]bool, len(buildPaths))
-	for _, buildPath := range buildPaths {
-		buildPathsMap[buildPath] = true
-	}
+func filterBuildPaths(buildPaths []string, filters []string) ([]string, error) {
+	filteredBuildPathsMap := map[string]bool{}
 
-	allowedPaths := strings.Split(filter, ",")
-	for _, allowedPath := range allowedPaths {
-		if !buildPathsMap[allowedPath] {
+	for _, filter := range filters {
+		foundMatch := false
+		filterIsDir := strings.HasSuffix(filter, "/")
+
+		for _, buildPath := range buildPaths {
+			isChild := filterIsDir && strings.HasPrefix(buildPath, filter)
+
+			if buildPath == filter || isChild {
+				filteredBuildPathsMap[buildPath] = true
+				foundMatch = true
+			}
+		}
+
+		if !foundMatch {
 			return nil, erk.WithParams(ErrCannotFilterBuildPaths, erk.Params{
-				"allowedPath": allowedPath,
-				"buildPaths":  buildPaths,
+				"filter":     filter,
+				"buildPaths": buildPaths,
 			})
 		}
 	}
 
-	return allowedPaths, nil
+	filteredBuildPaths := make([]string, 0, len(filteredBuildPathsMap))
+	for buildPath := range filteredBuildPathsMap {
+		filteredBuildPaths = append(filteredBuildPaths, buildPath)
+	}
+
+	sort.Strings(filteredBuildPaths)
+	return filteredBuildPaths, nil
 }
