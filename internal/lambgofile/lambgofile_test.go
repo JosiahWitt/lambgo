@@ -2,13 +2,13 @@ package lambgofile_test
 
 import (
 	"errors"
+	"io/fs"
 	"testing"
 
-	"bursavich.dev/fs-shim/io/fs"
 	"github.com/JosiahWitt/ensure"
 	"github.com/JosiahWitt/ensure/ensurepkg"
 	"github.com/JosiahWitt/lambgo/internal/lambgofile"
-	"github.com/JosiahWitt/lambgo/internal/mocks/bursavich.dev/fs-shim/io/mock_fs"
+	"github.com/JosiahWitt/lambgo/internal/mocks/io/mock_fs"
 	"github.com/golang/mock/gomock"
 )
 

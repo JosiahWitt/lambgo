@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"bursavich.dev/fs-shim/io/fs"
 	"github.com/JosiahWitt/lambgo/internal/builder"
 	"github.com/JosiahWitt/lambgo/internal/cmd"
 	"github.com/JosiahWitt/lambgo/internal/lambgofile"
@@ -23,7 +22,7 @@ func main() {
 		Version: Version,
 
 		Getwd:            os.Getwd,
-		LambgoFileLoader: &lambgofile.Loader{FS: fs.DirFS("")},
+		LambgoFileLoader: &lambgofile.Loader{FS: os.DirFS("")},
 		Builder: &builder.LambdaBuilder{
 			Cmd:    &runcmd.Runner{},
 			Zip:    &zipper.Zip{},

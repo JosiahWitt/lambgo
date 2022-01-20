@@ -3,7 +3,6 @@ module github.com/JosiahWitt/lambgo
 go 1.15
 
 require (
-	bursavich.dev/fs-shim v1.0.1
 	github.com/JosiahWitt/ensure v0.3.0
 	github.com/JosiahWitt/erk v0.5.6
 	github.com/golang/mock v1.4.4-0.20201210203420-1fe605df5e5f
