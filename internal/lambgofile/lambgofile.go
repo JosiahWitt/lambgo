@@ -3,10 +3,10 @@ package lambgofile
 
 import (
 	"errors"
+	"io/fs"
 	"path/filepath"
 	"strings"
 
-	"bursavich.dev/fs-shim/io/fs"
 	"github.com/JosiahWitt/erk"
 	"github.com/google/shlex"
 	"golang.org/x/mod/modfile"

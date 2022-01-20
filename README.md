@@ -4,26 +4,14 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/JosiahWitt/lambgo)](https://goreportcard.com/report/github.com/JosiahWitt/lambgo)
 [![codecov](https://codecov.io/gh/JosiahWitt/lambgo/branch/master/graph/badge.svg)](https://codecov.io/gh/JosiahWitt/lambgo)
 
-## Table of Contents
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Go Version Support
+Only the last two minor versions of Go are officially supported.
 
-- [Install](#install)
-- [About](#about)
-- [Configuring Lambgo](#configuring-lambgo)
-- [Examples](#examples)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
----
 
 ## Install
 ```bash
-# Before Go 1.16
-$ go get github.com/JosiahWitt/lambgo/cmd/lambgo
-
-# After Go 1.16
-$ go install github.com/JosiahWitt/lambgo/cmd/lambgo # You can pin a version by appending @v<semver>
+# Requires Go 1.16+
+$ go install github.com/JosiahWitt/lambgo/cmd/lambgo@latest
 ```
 
 
