@@ -7,18 +7,6 @@
 ## Go Version Support
 Only the last two minor versions of Go are officially supported.
 
-## Table of Contents
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [Install](#install)
-- [About](#about)
-- [Configuring Lambgo](#configuring-lambgo)
-- [Examples](#examples)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
----
 
 ## Install
 ```bash
