@@ -1,8 +1,8 @@
 install-tools:
-	go get github.com/golang/mock/mockgen
+	go install github.com/JosiahWitt/ensure/cmd/ensure@v0.2.0
 
 generate-mocks:
-	ensure generate mocks
+	ensure mocks generate
 
 test:
 	go test ./...
