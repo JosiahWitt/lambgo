@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [1.16, 1.17]
+        go-version: [1.16, 1.17, 1.18, 1.19]
 
     steps:
       - name: Set up Go ${{ matrix.go-version }}
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [1.16, 1.17]
+        go-version: [1.16, 1.17, 1.18, 1.19]
 
     steps:
       - name: Set up Go ${{ matrix.go-version }}
@@ -46,7 +46,7 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.34.1
+          version: v1.48.0
 
 
   regression-test:
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [1.16, 1.17]
+        go-version: [1.16, 1.17, 1.18, 1.19]
 
     steps:
       - name: Set up Go ${{ matrix.go-version }}

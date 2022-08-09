@@ -2,7 +2,7 @@ package builder_test
 
 import (
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"testing"
 
@@ -400,7 +400,7 @@ func TestBuildBinaries(t *testing.T) {
 	ensure.Run("when parallel mode disabled", func(ensure ensurepkg.Ensure) {
 		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
 			entry := table[i]
-			entry.Subject.Logger = log.New(ioutil.Discard, "", 0)
+			entry.Subject.Logger = log.New(io.Discard, "", 0)
 			entry.Config.DisableParallelBuild = true
 			gomock.InOrder(entry.AssembleMocks(entry.Mocks)...)
 
@@ -412,7 +412,7 @@ func TestBuildBinaries(t *testing.T) {
 	ensure.Run("when parallel mode enabled", func(ensure ensurepkg.Ensure) {
 		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
 			entry := table[i]
-			entry.Subject.Logger = log.New(ioutil.Discard, "", 0)
+			entry.Subject.Logger = log.New(io.Discard, "", 0)
 			entry.Config.DisableParallelBuild = false
 			entry.AssembleMocks(entry.Mocks)
 

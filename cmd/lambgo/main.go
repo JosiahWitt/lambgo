@@ -12,9 +12,10 @@ import (
 	"github.com/JosiahWitt/lambgo/internal/zipper"
 )
 
-//nolint:gochecknoglobals // Allows injecting the version
 // Version of the CLI.
 // Should be tied to the release version.
+//
+//nolint:gochecknoglobals // Allows injecting the version
 var Version = "0.1.7"
 
 func main() {

@@ -9,6 +9,8 @@ linters:
     - wrapcheck
     - godox
     - exhaustivestruct
+    - exhaustruct
+    - varnamelen
 
 linters-settings:
   lll:
@@ -25,5 +27,10 @@ issues:
         - goerr113
         - dupl
         - paralleltest
-        - exhaustivestruct
         - gocognit
+        - maintidx
+
+    # Exclude some linters from mocks
+    - text: mock_
+      linters:
+        - nosnakecase
