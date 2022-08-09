@@ -39,6 +39,12 @@ outDirectory: tmp
 # For example, if you want to provide extra compiler or linker options
 # buildFlags: -tags extra,tags -ldflags="-linker -flags"
 
+# Allow overriding the GOOS and GOARCH environment variables to
+# cross compile for a different operating system or architecture.
+# Optional, defaults to GOOS=linux and GOARCH=amd64.
+# goos: linux
+# goarch: amd64
+
 # Paths to build into Lambda zip files.
 # Each path should contain a main package.
 # The artifacts are built to: <outDirectory>/<buildPath>.zip
