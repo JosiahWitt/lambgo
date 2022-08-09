@@ -27,6 +27,12 @@ outDirectory: tmp
 # For example, if you want to provide extra compiler or linker options
 # buildFlags: -tags extra,tags -ldflags="-linker -flags"
 
+# Allow overriding the GOOS and GOARCH environment variables to
+# cross compile for a different operating system or architecture.
+# Optional, defaults to GOOS=linux and GOARCH=amd64.
+# goos: linux
+# goarch: amd64
+
 # Paths to build into Lambda zip files.
 # Each path should contain a main package.
 # The artifacts are built to: <outDirectory>/<buildPath>.zip
@@ -69,6 +75,8 @@ type Config struct {
 	OutDirectory   string   `yaml:"outDirectory"`
 	ZippedFileName string   `yaml:"zippedFileName"`
 	RawBuildFlags  string   `yaml:"buildFlags"`
+	Goos           string   `yaml:"goos"`
+	Goarch         string   `yaml:"goarch"`
 	BuildFlags     []string `yaml:"-"`
 	BuildPaths     []string `yaml:"buildPaths"`
 }
@@ -127,7 +135,19 @@ func (l *Loader) LoadConfig(pwd string) (*Config, error) {
 		config.BuildFlags = buildFlags
 	}
 
+	config.setDefaults()
+
 	config.RootPath = "/" + pwd
 	config.ModulePath = modulePath
 	return &config, nil
+}
+
+func (config *Config) setDefaults() {
+	if config.Goos == "" {
+		config.Goos = "linux"
+	}
+
+	if config.Goarch == "" {
+		config.Goarch = "amd64"
+	}
 }

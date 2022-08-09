@@ -1,7 +1,6 @@
 package zipper_test
 
 import (
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -23,8 +22,7 @@ func TestZipFile(t *testing.T) {
 	ensure := ensure.New(t)
 
 	ensure.Run("when successfully zipping file", func(ensure ensurepkg.Ensure) {
-		dir, err := ioutil.TempDir("", "*")
-		ensure(err).IsNotError()
+		dir := ensure.T().TempDir()
 
 		const fileName = "test-file.txt"
 		const zippedFileName = "test-file-zipped.txt"
@@ -33,7 +31,7 @@ func TestZipFile(t *testing.T) {
 		zipPath := path + ".zip"
 
 		// Write file
-		err = ioutil.WriteFile(path, []byte(sampleFile), 0655) //nolint:gosec
+		err := os.WriteFile(path, []byte(sampleFile), 0o655) //nolint:gosec
 		ensure(err).IsNotError()
 
 		// Zip file
@@ -53,7 +51,7 @@ func TestZipFile(t *testing.T) {
 
 		// Ensure unzipped file equals original
 		outPath := filepath.Join(outDir, zippedFileName)
-		data, err := ioutil.ReadFile(outPath)
+		data, err := os.ReadFile(outPath)
 		ensure(err).IsNotError()
 		ensure(string(data)).Equals(sampleFile)
 

@@ -61,6 +61,8 @@ func TestLoadConfig(t *testing.T) {
 				RootPath:     "/my/app",
 				ModulePath:   "github.com/my/app",
 				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
 				BuildPaths:   []string{"lambdas/hello_world"},
 			},
 
@@ -77,6 +79,8 @@ func TestLoadConfig(t *testing.T) {
 				RootPath:     "/my/app",
 				ModulePath:   "github.com/my/app",
 				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
 				BuildPaths:   []string{"lambdas/hello_world"},
 			},
 
@@ -94,6 +98,8 @@ func TestLoadConfig(t *testing.T) {
 				ModulePath:     "github.com/my/app",
 				ZippedFileName: "some-name",
 				OutDirectory:   "tmp",
+				Goos:           "linux",
+				Goarch:         "amd64",
 				BuildPaths:     []string{"lambdas/hello_world"},
 			},
 
@@ -114,6 +120,8 @@ zippedFileName: some-name
 				RawBuildFlags: `-foo -bar "baz qux"`,
 				BuildFlags:    []string{"-foo", "-bar", "baz qux"},
 				OutDirectory:  "tmp",
+				Goos:          "linux",
+				Goarch:        "amd64",
 				BuildPaths:    []string{"lambdas/hello_world"},
 			},
 
@@ -121,6 +129,45 @@ zippedFileName: some-name
 				"my/app/go.mod": defaultGoModFile,
 				"my/app/.lambgo.yml": `
 buildFlags: -foo -bar "baz qux"
+` + lambgofile.ExampleFile,
+			}),
+		},
+
+		{
+			Name: "with valid config including goos",
+			PWD:  "/my/app",
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "plan9",
+				Goarch:       "amd64",
+				BuildPaths:   []string{"lambdas/hello_world"},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+goos: plan9
+` + lambgofile.ExampleFile,
+			}),
+		},
+		{
+			Name: "with valid config including goarch",
+			PWD:  "/my/app",
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "arm64",
+				BuildPaths:   []string{"lambdas/hello_world"},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+goarch: arm64
 ` + lambgofile.ExampleFile,
 			}),
 		},

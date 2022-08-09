@@ -93,10 +93,7 @@ func (b *LambdaBuilder) buildDependencies(config *lambgofile.Config) error {
 		CMD:  "go",
 		Args: append([]string{"build", "-trimpath"}, buildPaths...),
 
-		EnvVars: map[string]string{
-			"GOOS":   "linux",
-			"GOARCH": "amd64",
-		},
+		EnvVars: buildEnvVars(config),
 	})
 	if err != nil {
 		return erk.WrapAs(ErrGoBuildDependenciesFailed, err)
@@ -136,10 +133,7 @@ func (b *LambdaBuilder) buildBinary(config *lambgofile.Config, buildPath string)
 		CMD:  "go",
 		Args: fullArgs,
 
-		EnvVars: map[string]string{
-			"GOOS":   "linux",
-			"GOARCH": "amd64",
-		},
+		EnvVars: buildEnvVars(config),
 	})
 	if err != nil {
 		return erk.WrapWith(ErrGoBuildFailed, err, erk.Params{
@@ -159,6 +153,13 @@ func (b *LambdaBuilder) buildBinary(config *lambgofile.Config, buildPath string)
 	}
 
 	return nil
+}
+
+func buildEnvVars(config *lambgofile.Config) map[string]string {
+	return map[string]string{
+		"GOOS":   config.Goos,
+		"GOARCH": config.Goarch,
+	}
 }
 
 func buildOutPath(config *lambgofile.Config, buildPath string) string {
