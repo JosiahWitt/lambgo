@@ -56,7 +56,7 @@ func (b *LambdaBuilder) BuildBinaries(config *lambgofile.Config) error {
 	b.Logger.Println()
 	b.Logger.Println("Building Lambdas:")
 	for _, buildPath := range config.BuildPaths {
-		if !config.DisableParallelBuild {
+		if config.NumParallel != 1 {
 			asyncParams.wg.Add(1)
 			go b.buildBinaryAsync(config, buildPath, asyncParams)
 		} else {

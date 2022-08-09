@@ -401,7 +401,7 @@ func TestBuildBinaries(t *testing.T) {
 		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
 			entry := table[i]
 			entry.Subject.Logger = log.New(io.Discard, "", 0)
-			entry.Config.DisableParallelBuild = true
+			entry.Config.NumParallel = 1
 			gomock.InOrder(entry.AssembleMocks(entry.Mocks)...)
 
 			err := entry.Subject.BuildBinaries(entry.Config)
@@ -409,11 +409,11 @@ func TestBuildBinaries(t *testing.T) {
 		})
 	})
 
-	ensure.Run("when parallel mode enabled", func(ensure ensurepkg.Ensure) {
+	ensure.Run("when all Lambdas are built in parallel at the same time", func(ensure ensurepkg.Ensure) {
 		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
 			entry := table[i]
 			entry.Subject.Logger = log.New(io.Discard, "", 0)
-			entry.Config.DisableParallelBuild = false
+			entry.Config.NumParallel = len(entry.Config.BuildPaths)
 			entry.AssembleMocks(entry.Mocks)
 
 			err := entry.Subject.BuildBinaries(entry.Config)
