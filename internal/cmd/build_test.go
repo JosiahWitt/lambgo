@@ -2,6 +2,7 @@ package cmd_test
 
 import (
 	"errors"
+	"runtime"
 	"testing"
 
 	"github.com/JosiahWitt/ensure"
@@ -42,12 +43,15 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath: "/some/root/path",
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
 					}, nil)
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
-						RootPath: "/some/root/path",
+						NumParallel: 3,
+						RootPath:    "/some/root/path",
+						BuildPaths:  []string{"path1", "path2", "path3"},
 					}).
 					Return(nil)
 			},
@@ -61,13 +65,36 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath: "/some/root/path",
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
 					}, nil)
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
-						DisableParallelBuild: true,
-						RootPath:             "/some/root/path",
+						NumParallel: 1,
+						RootPath:    "/some/root/path",
+						BuildPaths:  []string{"path1", "path2", "path3"},
+					}).
+					Return(nil)
+			},
+		},
+		{
+			Name:  "with valid execution: disable parallel generation when --num-parallel is provided",
+			Flags: []string{"--disable-parallel", "--num-parallel=12"},
+			Getwd: defaultWd,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+
+				m.Builder.EXPECT().
+					BuildBinaries(&lambgofile.Config{
+						NumParallel: 1,
+						RootPath:    "/some/root/path",
+						BuildPaths:  []string{"path1", "path2", "path3"},
 					}).
 					Return(nil)
 			},
@@ -87,8 +114,9 @@ func TestBuild(t *testing.T) {
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"abc/123", "xyz/456"},
+						NumParallel: 2,
+						RootPath:    "/some/root/path",
+						BuildPaths:  []string{"abc/123", "xyz/456"},
 					}).
 					Return(nil)
 			},
@@ -108,8 +136,73 @@ func TestBuild(t *testing.T) {
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
+						NumParallel: 3,
+						RootPath:    "/some/root/path",
+						BuildPaths:  []string{"nested/one", "nested/two", "xyz/456"},
+					}).
+					Return(nil)
+			},
+		},
+
+		{
+			Name:  "with valid execution: setting --num-parallel to all",
+			Flags: []string{"--num-parallel=all"},
+			Getwd: defaultWd,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
 						RootPath:   "/some/root/path",
-						BuildPaths: []string{"nested/one", "nested/two", "xyz/456"},
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+
+				m.Builder.EXPECT().
+					BuildBinaries(&lambgofile.Config{
+						NumParallel: 3,
+						RootPath:    "/some/root/path",
+						BuildPaths:  []string{"path1", "path2", "path3"},
+					}).
+					Return(nil)
+			},
+		},
+		{
+			Name:  "with valid execution: configuring --num-parallel to a static value",
+			Flags: []string{"--num-parallel=2"},
+			Getwd: defaultWd,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+
+				m.Builder.EXPECT().
+					BuildBinaries(&lambgofile.Config{
+						NumParallel: 2,
+						RootPath:    "/some/root/path",
+						BuildPaths:  []string{"path1", "path2", "path3"},
+					}).
+					Return(nil)
+			},
+		},
+		{
+			Name:  "with valid execution: configuring --num-parallel based on the number of CPUs",
+			Flags: []string{"--num-parallel=1.5x"},
+			Getwd: defaultWd,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+
+				m.Builder.EXPECT().
+					BuildBinaries(&lambgofile.Config{
+						NumParallel: int(1.5 * float64(runtime.NumCPU())),
+						RootPath:    "/some/root/path",
+						BuildPaths:  []string{"path1", "path2", "path3"},
 					}).
 					Return(nil)
 			},
@@ -139,8 +232,122 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
+						NumParallel: 2,
+						RootPath:    "/some/root/path",
+						BuildPaths:  []string{"abc/123", "xyz/456"},
+					}, nil)
+			},
+		},
+
+		{
+			Name:          "when --num-parallel is nothing",
+			Flags:         []string{"--num-parallel="},
+			Getwd:         defaultWd,
+			ExpectedError: cmd.ErrInvalidNumParallel,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
 						RootPath:   "/some/root/path",
-						BuildPaths: []string{"abc/123", "xyz/456"},
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+			},
+		},
+		{
+			Name:          "when --num-parallel has a non-number value before x",
+			Flags:         []string{"--num-parallel=nox"},
+			Getwd:         defaultWd,
+			ExpectedError: cmd.ErrInvalidNumParallel,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+			},
+		},
+		{
+			Name:          "when --num-parallel has a small number before x",
+			Flags:         []string{"--num-parallel=0.0001x"},
+			Getwd:         defaultWd,
+			ExpectedError: cmd.ErrInvalidNumParallel,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+			},
+		},
+		{
+			Name:          "when --num-parallel has a negative number before x",
+			Flags:         []string{"--num-parallel=-1x"},
+			Getwd:         defaultWd,
+			ExpectedError: cmd.ErrInvalidNumParallel,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+			},
+		},
+		{
+			Name:          "when --num-parallel is not a number",
+			Flags:         []string{"--num-parallel=no"},
+			Getwd:         defaultWd,
+			ExpectedError: cmd.ErrInvalidNumParallel,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+			},
+		},
+		{
+			Name:          "when --num-parallel is a float",
+			Flags:         []string{"--num-parallel=1.5"},
+			Getwd:         defaultWd,
+			ExpectedError: cmd.ErrInvalidNumParallel,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+			},
+		},
+		{
+			Name:          "when --num-parallel is zero",
+			Flags:         []string{"--num-parallel=0"},
+			Getwd:         defaultWd,
+			ExpectedError: cmd.ErrInvalidNumParallel,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
+					}, nil)
+			},
+		},
+		{
+			Name:          "when --num-parallel is a negative number",
+			Flags:         []string{"--num-parallel=-1"},
+			Getwd:         defaultWd,
+			ExpectedError: cmd.ErrInvalidNumParallel,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath:   "/some/root/path",
+						BuildPaths: []string{"path1", "path2", "path3"},
 					}, nil)
 			},
 		},

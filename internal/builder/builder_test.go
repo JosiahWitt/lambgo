@@ -53,12 +53,12 @@ func TestBuildBinaries(t *testing.T) {
 				OutDirectory: "out/dir",
 				Goos:         "linux",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/path1", "lambdas/path2"},
+				BuildPaths:   []string{"lambdas/path1", "lambdas/path2", "lambdas/path3"},
 			},
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
 				return []*gomock.Call{
-					mockBuildDependencies(m, "./lambdas/path1", "./lambdas/path2"),
+					mockBuildDependencies(m, "./lambdas/path1", "./lambdas/path2", "./lambdas/path3"),
 
 					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
 						PWD:  "/my/root",
@@ -83,6 +83,18 @@ func TestBuildBinaries(t *testing.T) {
 						},
 					}).Return("", nil),
 					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path2", "path2").Return(nil),
+
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/path3", "./lambdas/path3"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", nil),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/path3", "path3").Return(nil),
 				}
 			},
 		},
@@ -401,7 +413,7 @@ func TestBuildBinaries(t *testing.T) {
 		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
 			entry := table[i]
 			entry.Subject.Logger = log.New(io.Discard, "", 0)
-			entry.Config.DisableParallelBuild = true
+			entry.Config.NumParallel = 1
 			gomock.InOrder(entry.AssembleMocks(entry.Mocks)...)
 
 			err := entry.Subject.BuildBinaries(entry.Config)
@@ -409,11 +421,23 @@ func TestBuildBinaries(t *testing.T) {
 		})
 	})
 
-	ensure.Run("when parallel mode enabled", func(ensure ensurepkg.Ensure) {
+	ensure.Run("when Lambdas are built in parallel in groups", func(ensure ensurepkg.Ensure) {
 		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
 			entry := table[i]
 			entry.Subject.Logger = log.New(io.Discard, "", 0)
-			entry.Config.DisableParallelBuild = false
+			entry.Config.NumParallel = 2
+			entry.AssembleMocks(entry.Mocks)
+
+			err := entry.Subject.BuildBinaries(entry.Config)
+			ensure(err).IsError(err)
+		})
+	})
+
+	ensure.Run("when all Lambdas are built in parallel at the same time", func(ensure ensurepkg.Ensure) {
+		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
+			entry := table[i]
+			entry.Subject.Logger = log.New(io.Discard, "", 0)
+			entry.Config.NumParallel = len(entry.Config.BuildPaths)
 			entry.AssembleMocks(entry.Mocks)
 
 			err := entry.Subject.BuildBinaries(entry.Config)

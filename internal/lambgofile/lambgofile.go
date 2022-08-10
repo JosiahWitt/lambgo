@@ -68,9 +68,9 @@ var _ LoaderAPI = &Loader{}
 
 // Config is the root of the .lambgo.yml file.
 type Config struct {
-	DisableParallelBuild bool   `yaml:"-"`
-	RootPath             string `yaml:"-"`
-	ModulePath           string `yaml:"-"`
+	NumParallel int    `yaml:"-"`
+	RootPath    string `yaml:"-"`
+	ModulePath  string `yaml:"-"`
 
 	OutDirectory   string   `yaml:"outDirectory"`
 	ZippedFileName string   `yaml:"zippedFileName"`

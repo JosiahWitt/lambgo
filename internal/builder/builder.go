@@ -44,7 +44,8 @@ func (b *LambdaBuilder) BuildBinaries(config *lambgofile.Config) error {
 		config.OutDirectory = "tmp"
 	}
 
-	asyncParams := &buildBinaryAsyncParams{
+	sharedParams := &sharedBuilderParams{
+		config: config,
 		errors: erg.NewAs(ErrMultipleBuildFailures),
 	}
 
@@ -53,24 +54,32 @@ func (b *LambdaBuilder) BuildBinaries(config *lambgofile.Config) error {
 		return err
 	}
 
-	b.Logger.Println()
-	b.Logger.Println("Building Lambdas:")
-	for _, buildPath := range config.BuildPaths {
-		if !config.DisableParallelBuild {
-			asyncParams.wg.Add(1)
-			go b.buildBinaryAsync(config, buildPath, asyncParams)
-		} else {
-			b.Logger.Printf(" - Building: '%s' -> '%s.zip'\n", buildPath, buildOutPath(config, buildPath))
-
-			if err := b.buildBinary(config, buildPath); err != nil {
-				asyncParams.errors = erg.Append(asyncParams.errors, err)
-			}
-		}
+	ch := make(chan *builderParams)
+	for i := 0; i < config.NumParallel; i++ {
+		go b.launchBuilder(ch)
 	}
 
-	asyncParams.wg.Wait()
-	if erg.Any(asyncParams.errors) {
-		return asyncParams.errors
+	b.Logger.Println()
+	if len(config.BuildPaths) == 1 {
+		b.Logger.Println("Building 1 Lambda")
+	} else if config.NumParallel == 1 {
+		b.Logger.Printf("Building %d Lambdas one at a time:\n", len(config.BuildPaths))
+	} else if config.NumParallel == len(config.BuildPaths) {
+		b.Logger.Printf("Building %d Lambdas all at once:\n", len(config.BuildPaths))
+	} else {
+		b.Logger.Printf("Building %d Lambdas in parallel groups of %d:\n", len(config.BuildPaths), config.NumParallel)
+	}
+
+	for _, buildPath := range config.BuildPaths {
+		sharedParams.wg.Add(1)
+		ch <- &builderParams{buildPath: buildPath, sharedBuilderParams: sharedParams}
+	}
+
+	sharedParams.wg.Wait()
+	close(ch)
+
+	if erg.Any(sharedParams.errors) {
+		return sharedParams.errors
 	}
 
 	return nil
@@ -102,23 +111,37 @@ func (b *LambdaBuilder) buildDependencies(config *lambgofile.Config) error {
 	return nil
 }
 
-type buildBinaryAsyncParams struct {
-	wg       sync.WaitGroup
-	errors   error
-	errorsMu sync.Mutex
+type builderParams struct {
+	*sharedBuilderParams
+
+	buildPath string
 }
 
-func (b *LambdaBuilder) buildBinaryAsync(config *lambgofile.Config, buildPath string, asyncParams *buildBinaryAsyncParams) {
-	defer asyncParams.wg.Done()
+func (b *LambdaBuilder) launchBuilder(ch chan *builderParams) {
+	for params := range ch {
+		b.buildBinaryAsync(params)
+	}
+}
 
-	if err := b.buildBinary(config, buildPath); err != nil {
-		asyncParams.errorsMu.Lock()
-		defer asyncParams.errorsMu.Unlock()
-		asyncParams.errors = erg.Append(asyncParams.errors, err)
+type sharedBuilderParams struct {
+	config *lambgofile.Config
+
+	wg       sync.WaitGroup
+	errors   error
+	errorsMu sync.Mutex //nolint:structcheck // It is used in buildBinaryAsync
+}
+
+func (b *LambdaBuilder) buildBinaryAsync(params *builderParams) {
+	defer params.wg.Done()
+
+	if err := b.buildBinary(params.config, params.buildPath); err != nil {
+		params.errorsMu.Lock()
+		defer params.errorsMu.Unlock()
+		params.errors = erg.Append(params.errors, err)
 		return
 	}
 
-	b.Logger.Printf(" - Built: '%s' -> '%s.zip'\n", buildPath, buildOutPath(config, buildPath))
+	b.Logger.Printf(" - Built: '%s' -> '%s.zip'\n", params.buildPath, buildOutPath(params.config, params.buildPath))
 }
 
 func (b *LambdaBuilder) buildBinary(config *lambgofile.Config, buildPath string) error {
