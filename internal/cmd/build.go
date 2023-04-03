@@ -137,7 +137,7 @@ func parseNumParallel(config *lambgofile.Config, numParallel string) (int, error
 
 	if strings.HasSuffix(numParallel, cpuParallelSuffix) {
 		prefix := strings.TrimSuffix(numParallel, cpuParallelSuffix)
-		cpuMultiplier, err := strconv.ParseFloat(prefix, 64) //nolint:gomnd
+		cpuMultiplier, err := strconv.ParseFloat(prefix, 64)
 		if err != nil {
 			return 0, erk.WrapWith(ErrInvalidNumParallel, err, erk.Params{"numParallel": numParallel})
 		}
