@@ -16,14 +16,14 @@ import (
 // Should be tied to the release version.
 //
 //nolint:gochecknoglobals // Allows injecting the version
-var Version = "0.1.13"
+var Version = "0.1.14"
 
 func main() {
 	app := cmd.App{
 		Version: Version,
 
 		Getwd:            os.Getwd,
-		LambgoFileLoader: &lambgofile.Loader{FS: os.DirFS("")},
+		LambgoFileLoader: &lambgofile.Loader{FS: os.DirFS("/")},
 		Builder: &builder.LambdaBuilder{
 			Cmd:    &runcmd.Runner{},
 			Zip:    &zipper.Zip{},
