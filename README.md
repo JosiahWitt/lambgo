@@ -10,7 +10,7 @@ Only the last two minor versions of Go are officially supported.
 
 ## Install
 ```bash
-# Requires Go 1.16+
+# Requires Go 1.18+
 $ go install github.com/JosiahWitt/lambgo/cmd/lambgo@latest
 ```
 
