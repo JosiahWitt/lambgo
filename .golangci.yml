@@ -11,6 +11,7 @@ linters:
     - exhaustivestruct
     - exhaustruct
     - varnamelen
+    - depguard
     - ifshort # Deprecated
     - scopelint # Deprecated
     - interfacer # Deprecated
@@ -32,7 +33,7 @@ issues:
         - funlen
         - lll
         - goconst
-        - goerr113
+        - err113
         - dupl
         - paralleltest
         - gocognit

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/JosiahWitt/ensure"
-	"github.com/JosiahWitt/ensure/ensurepkg"
+	"github.com/JosiahWitt/ensure/ensuring"
 	"github.com/JosiahWitt/lambgo/internal/zipper"
 )
 
@@ -21,7 +21,7 @@ const sampleFile = "************************************************************
 func TestZipFile(t *testing.T) {
 	ensure := ensure.New(t)
 
-	ensure.Run("when successfully zipping file", func(ensure ensurepkg.Ensure) {
+	ensure.Run("when successfully zipping file", func(ensure ensuring.E) {
 		dir := ensure.T().TempDir()
 
 		const fileName = "test-file.txt"

@@ -2,7 +2,6 @@ package zipper
 
 import (
 	"archive/zip"
-	"fmt"
 	"io"
 	"os"
 	"time"
@@ -20,7 +19,7 @@ var _ ZipAPI = &Zip{}
 //
 // zippedFileName is the name of the file once it is zipped.
 func (z *Zip) ZipFile(path, zippedFileName string) error {
-	zipPath := fmt.Sprintf("%s.zip", path)
+	zipPath := path + ".zip"
 	zipFile, err := os.Create(zipPath)
 	if err != nil {
 		return err

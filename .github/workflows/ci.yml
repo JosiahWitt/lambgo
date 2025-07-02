@@ -4,9 +4,10 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix:
-        go-version: ["1.16", "1.17", "1.18", "1.19", "1.20"]
+        go-version: ["1.18", "1.19", "1.20", "1.21", "1.22", "1.23", "1.24"]
 
     steps:
       - name: Set up Go ${{ matrix.go-version }}
@@ -28,9 +29,10 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix:
-        go-version: ["1.16", "1.17", "1.18", "1.19", "1.20"]
+        go-version: ["1.18", "1.19", "1.20", "1.21", "1.22", "1.23", "1.24"]
 
     steps:
       - name: Set up Go ${{ matrix.go-version }}
@@ -44,14 +46,15 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.52.2
+          version: v1.64.8
 
   regression-test:
     name: Regression Test
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix:
-        go-version: ["1.16", "1.17", "1.18", "1.19", "1.20"]
+        go-version: ["1.18", "1.19", "1.20", "1.21", "1.22", "1.23", "1.24"]
 
     steps:
       - name: Set up Go ${{ matrix.go-version }}

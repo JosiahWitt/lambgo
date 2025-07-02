@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/JosiahWitt/ensure"
-	"github.com/JosiahWitt/ensure/ensurepkg"
+	"github.com/JosiahWitt/ensure/ensuring"
 	"github.com/JosiahWitt/lambgo/internal/builder"
 	"github.com/JosiahWitt/lambgo/internal/lambgofile"
 	"github.com/JosiahWitt/lambgo/internal/mocks/mock_runcmd"
@@ -409,8 +409,8 @@ func TestBuildBinaries(t *testing.T) {
 		},
 	}
 
-	ensure.Run("when parallel mode disabled", func(ensure ensurepkg.Ensure) {
-		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
+	ensure.Run("when parallel mode disabled", func(ensure ensuring.E) {
+		ensure.RunTableByIndex(table, func(ensure ensuring.E, i int) {
 			entry := table[i]
 			entry.Subject.Logger = log.New(io.Discard, "", 0)
 			entry.Config.NumParallel = 1
@@ -421,8 +421,8 @@ func TestBuildBinaries(t *testing.T) {
 		})
 	})
 
-	ensure.Run("when Lambdas are built in parallel in groups", func(ensure ensurepkg.Ensure) {
-		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
+	ensure.Run("when Lambdas are built in parallel in groups", func(ensure ensuring.E) {
+		ensure.RunTableByIndex(table, func(ensure ensuring.E, i int) {
 			entry := table[i]
 			entry.Subject.Logger = log.New(io.Discard, "", 0)
 			entry.Config.NumParallel = 2
@@ -433,8 +433,8 @@ func TestBuildBinaries(t *testing.T) {
 		})
 	})
 
-	ensure.Run("when all Lambdas are built in parallel at the same time", func(ensure ensurepkg.Ensure) {
-		ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
+	ensure.Run("when all Lambdas are built in parallel at the same time", func(ensure ensuring.E) {
+		ensure.RunTableByIndex(table, func(ensure ensuring.E, i int) {
 			entry := table[i]
 			entry.Subject.Logger = log.New(io.Discard, "", 0)
 			entry.Config.NumParallel = len(entry.Config.BuildPaths)
