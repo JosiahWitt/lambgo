@@ -16,7 +16,7 @@ type ExecParams struct {
 }
 
 type RunnerAPI interface {
-	Exec(*ExecParams) (string, error)
+	Exec(params *ExecParams) (string, error)
 }
 
 type Runner struct{}

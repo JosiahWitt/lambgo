@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/JosiahWitt/ensure"
-	"github.com/JosiahWitt/ensure/ensurepkg"
+	"github.com/JosiahWitt/ensure/ensuring"
 	"github.com/JosiahWitt/lambgo/internal/cmd"
 	"github.com/JosiahWitt/lambgo/internal/lambgofile"
 	"github.com/JosiahWitt/lambgo/internal/mocks/mock_builder"
@@ -372,7 +372,7 @@ func TestBuild(t *testing.T) {
 		},
 	}
 
-	ensure.RunTableByIndex(table, func(ensure ensurepkg.Ensure, i int) {
+	ensure.RunTableByIndex(table, func(ensure ensuring.E, i int) {
 		entry := table[i]
 		entry.Subject.Getwd = entry.Getwd
 

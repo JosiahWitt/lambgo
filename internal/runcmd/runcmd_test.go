@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/JosiahWitt/ensure"
-	"github.com/JosiahWitt/ensure/ensurepkg"
+	"github.com/JosiahWitt/ensure/ensuring"
 	"github.com/JosiahWitt/lambgo/internal/runcmd"
 )
 
 func TestRunnerExec(t *testing.T) {
 	ensure := ensure.New(t)
 
-	ensure.Run("with valid command execution", func(ensure ensurepkg.Ensure) {
+	ensure.Run("with valid command execution", func(ensure ensuring.E) {
 		runner := runcmd.Runner{}
 		result, err := runner.Exec(&runcmd.ExecParams{
 			PWD:  "/tmp",
@@ -25,7 +25,7 @@ func TestRunnerExec(t *testing.T) {
 		ensure(result).Equals("/tmp\n")
 	})
 
-	ensure.Run("with environment variables", func(ensure ensurepkg.Ensure) {
+	ensure.Run("with environment variables", func(ensure ensuring.E) {
 		runner := runcmd.Runner{}
 		result, err := runner.Exec(&runcmd.ExecParams{
 			PWD:  "/tmp",
@@ -39,7 +39,7 @@ func TestRunnerExec(t *testing.T) {
 		ensure(result).Equals("hello\n")
 	})
 
-	ensure.Run("with invalid command", func(ensure ensurepkg.Ensure) {
+	ensure.Run("with invalid command", func(ensure ensuring.E) {
 		runner := runcmd.Runner{}
 		result, err := runner.Exec(&runcmd.ExecParams{
 			CMD: "this-command-does-not-exist",
@@ -50,7 +50,7 @@ func TestRunnerExec(t *testing.T) {
 		ensure(result).IsEmpty()
 	})
 
-	ensure.Run("with failing command", func(ensure ensurepkg.Ensure) {
+	ensure.Run("with failing command", func(ensure ensuring.E) {
 		runner := runcmd.Runner{}
 		result, err := runner.Exec(&runcmd.ExecParams{
 			CMD:  "sh",
