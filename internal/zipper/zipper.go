@@ -18,21 +18,37 @@ var _ ZipAPI = &Zip{}
 // ZipFile located at path to <path>.zip.
 //
 // zippedFileName is the name of the file once it is zipped.
-func (z *Zip) ZipFile(path, zippedFileName string) error {
+func (z *Zip) ZipFile(path, zippedFileName string) (err error) {
 	zipPath := path + ".zip"
 	zipFile, err := os.Create(zipPath)
 	if err != nil {
 		return err
 	}
-	defer zipFile.Close()
+	defer func() {
+		nestedErr := zipFile.Close()
+		if err == nil { // Only set err if it is not already set
+			err = nestedErr
+		}
+	}()
 
 	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
+	defer func() {
+		nestedErr := zipWriter.Close()
+		if err == nil { // Only set err if it is not already set
+			err = nestedErr
+		}
+	}()
 
 	binaryFile, err := os.Open(path)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		nestedErr := binaryFile.Close()
+		if err == nil { // Only set err if it is not already set
+			err = nestedErr
+		}
+	}()
 
 	fileInfo, err := binaryFile.Stat()
 	if err != nil {

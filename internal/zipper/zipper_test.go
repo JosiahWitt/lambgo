@@ -31,7 +31,7 @@ func TestZipFile(t *testing.T) {
 		zipPath := path + ".zip"
 
 		// Write file
-		err := os.WriteFile(path, []byte(sampleFile), 0o655) //nolint:gosec
+		err := os.WriteFile(path, []byte(sampleFile), 0o655)
 		ensure(err).IsNotError()
 
 		// Zip file
