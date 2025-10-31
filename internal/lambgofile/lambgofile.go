@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/JosiahWitt/erk"
+	"github.com/goccy/go-yaml"
 	"github.com/google/shlex"
 	"golang.org/x/mod/modfile"
-	"gopkg.in/yaml.v3"
 )
 
 // ExampleFile for use in error messages and CLI help menus.

@@ -173,6 +173,94 @@ goarch: arm64
 		},
 
 		{
+			Name: "with multiple buildPaths",
+			PWD:  "/my/app",
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				BuildPaths:   []string{"lambdas/hello_world", "lambdas/goodbye_world", "functions/my_function"},
+			},
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildPaths:
+  - lambdas/hello_world
+  - lambdas/goodbye_world
+  - functions/my_function
+`,
+			}),
+		},
+
+		{
+			Name: "with complex config including all fields and comments",
+			PWD:  "/my/app",
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:       "/my/app",
+				ModulePath:     "github.com/my/app",
+				OutDirectory:   "build",
+				ZippedFileName: "bootstrap",
+				RawBuildFlags:  `-tags prod -ldflags="-s -w"`,
+				BuildFlags:     []string{"-tags", "prod", "-ldflags=-s -w"},
+				Goos:           "linux",
+				Goarch:         "arm64",
+				BuildPaths:     []string{"lambdas/api", "lambdas/worker"},
+			},
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `# Production configuration
+# This is a comment
+outDirectory: build
+
+# Using bootstrap for provided.al2 runtime
+zippedFileName: bootstrap
+
+# Build flags for production
+buildFlags: -tags prod -ldflags="-s -w"
+
+# Target ARM64 architecture
+goos: linux
+goarch: arm64
+
+# Lambda functions to build
+buildPaths:
+  - lambdas/api
+  - lambdas/worker
+`,
+			}),
+		},
+
+		{
+			Name: "with various whitespace and formatting",
+			PWD:  "/my/app",
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "output",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				BuildPaths:   []string{"lambdas/func1", "lambdas/func2"},
+			},
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory:    output
+
+
+buildPaths:
+
+  -    lambdas/func1
+  -  lambdas/func2
+
+
+`,
+			}),
+		},
+
+		{
 			Name:          "when missing go.mod file",
 			PWD:           "/my/app",
 			ExpectedError: lambgofile.ErrCannotFindGoModule,
