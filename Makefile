@@ -11,4 +11,5 @@ test-coverage:
 	go test ./... -coverprofile=/tmp/lambgo.coverage && go tool cover -html=/tmp/lambgo.coverage -o=./tests/coverage.html
 
 lint:
+	staticcheck ./...
 	golangci-lint run
