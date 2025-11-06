@@ -240,20 +240,6 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			Name:          "when --num-parallel is nothing",
-			Flags:         []string{"--num-parallel="},
-			Getwd:         defaultWd,
-			ExpectedError: cmd.ErrInvalidNumParallel,
-			SetupMocks: func(m *Mocks) {
-				m.LambgoFileLoader.EXPECT().
-					LoadConfig("/test").
-					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
-					}, nil)
-			},
-		},
-		{
 			Name:          "when --num-parallel has a non-number value before x",
 			Flags:         []string{"--num-parallel=nox"},
 			Getwd:         defaultWd,

@@ -53,12 +53,12 @@ func (m *MockLoaderAPI) LoadConfig(_pwd string) (*lambgofile.Config, error) {
 //
 // Inputs:
 //
-//  pwd string
+//	pwd string
 //
 // Outputs:
 //
-//  *lambgofile.Config
-//  error
+//	*lambgofile.Config
+//	error
 func (mr *MockLoaderAPIMockRecorder) LoadConfig(_pwd interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	inputs := []interface{}{_pwd}

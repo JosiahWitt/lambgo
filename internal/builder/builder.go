@@ -55,7 +55,7 @@ func (b *LambdaBuilder) BuildBinaries(config *lambgofile.Config) error {
 	}
 
 	ch := make(chan *builderParams)
-	for i := 0; i < config.NumParallel; i++ {
+	for range config.NumParallel {
 		go b.launchBuilder(ch)
 	}
 

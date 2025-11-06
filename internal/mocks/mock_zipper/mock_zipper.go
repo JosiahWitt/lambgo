@@ -51,12 +51,12 @@ func (m *MockZipAPI) ZipFile(_path string, _zippedFileName string) error {
 //
 // Inputs:
 //
-//  path string
-//  zippedFileName string
+//	path string
+//	zippedFileName string
 //
 // Outputs:
 //
-//  error
+//	error
 func (mr *MockZipAPIMockRecorder) ZipFile(_path interface{}, _zippedFileName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	inputs := []interface{}{_path, _zippedFileName}

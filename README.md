@@ -9,9 +9,15 @@ Only the last two minor versions of Go are officially supported.
 
 
 ## Install
+### Install as a binary
 ```bash
-# Requires Go 1.18+
-$ go install github.com/JosiahWitt/lambgo/cmd/lambgo@latest
+go install github.com/JosiahWitt/lambgo/cmd/lambgo@latest
+```
+
+### Install as a [tool](https://go.dev/doc/modules/managing-dependencies#tools) (Go 1.24+)
+```bash
+go get -tool github.com/JosiahWitt/lambgo/cmd/lambgo@latest
+# Usage: go tool lambgo build
 ```
 
 

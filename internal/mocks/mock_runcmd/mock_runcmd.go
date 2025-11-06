@@ -39,9 +39,9 @@ func (m *MockRunnerAPI) EXPECT() *MockRunnerAPIMockRecorder {
 }
 
 // Exec mocks Exec on RunnerAPI.
-func (m *MockRunnerAPI) Exec(_arg0 *runcmd.ExecParams) (string, error) {
+func (m *MockRunnerAPI) Exec(_params *runcmd.ExecParams) (string, error) {
 	m.ctrl.T.Helper()
-	inputs := []interface{}{_arg0}
+	inputs := []interface{}{_params}
 	ret := m.ctrl.Call(m, "Exec", inputs...)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
@@ -53,14 +53,14 @@ func (m *MockRunnerAPI) Exec(_arg0 *runcmd.ExecParams) (string, error) {
 //
 // Inputs:
 //
-//  *runcmd.ExecParams
+//	params *runcmd.ExecParams
 //
 // Outputs:
 //
-//  string
-//  error
-func (mr *MockRunnerAPIMockRecorder) Exec(_arg0 interface{}) *gomock.Call {
+//	string
+//	error
+func (mr *MockRunnerAPIMockRecorder) Exec(_params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	inputs := []interface{}{_arg0}
+	inputs := []interface{}{_params}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockRunnerAPI)(nil).Exec), inputs...)
 }
