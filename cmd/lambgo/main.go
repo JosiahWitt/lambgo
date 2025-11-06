@@ -16,7 +16,7 @@ import (
 // Should be tied to the release version.
 //
 //nolint:gochecknoglobals // Allows injecting the version
-var Version = "0.1.16"
+var Version = "0.2.0"
 
 func main() {
 	app := cmd.App{
