@@ -61,5 +61,26 @@ func TestZipFile(t *testing.T) {
 		ensure(fileInfo.ModTime()).Equals(time.Date(2009, 11, 10, 0, 0, 0, 0, time.UTC))
 	})
 
+	ensure.Run("when zip file cannot be created", func(ensure ensuring.E) {
+		dir := ensure.T().TempDir()
+
+		// Try to create zip in an invalid location (some-dir/file-name.zip), since some-dir doesn't exist
+		invalidPath := filepath.Join(dir, "some-dir", "file-name")
+
+		z := zipper.Zip{}
+		err := z.ZipFile(invalidPath, "output.zip")
+		ensure(err).IsNotNil()
+	})
+
+	ensure.Run("when path does not exist", func(ensure ensuring.E) {
+		dir := ensure.T().TempDir()
+
+		invalidPath := filepath.Join(dir, "file-name")
+
+		z := zipper.Zip{}
+		err := z.ZipFile(invalidPath, "output.zip")
+		ensure(err).IsNotNil()
+	})
+
 	// TODO: More tests
 }
