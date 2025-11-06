@@ -128,7 +128,7 @@ type sharedBuilderParams struct {
 
 	wg       sync.WaitGroup
 	errors   error
-	errorsMu sync.Mutex //nolint:structcheck // It is used in buildBinaryAsync
+	errorsMu sync.Mutex
 }
 
 func (b *LambdaBuilder) buildBinaryAsync(params *builderParams) {

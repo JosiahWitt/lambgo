@@ -1,45 +1,52 @@
+version: "2"
+
 linters:
-  enable-all: true
-  fast: false
+  default: all
   disable:
-    - maligned
     - prealloc
     - wsl
     - nlreturn
     - wrapcheck
     - godox
-    - exhaustivestruct
     - exhaustruct
     - varnamelen
     - depguard
-    - ifshort # Deprecated
-    - scopelint # Deprecated
-    - interfacer # Deprecated
-    - golint # Deprecated
+    - noctx
+    - noinlineerr
+    - paralleltest
+    - revive
+    - wsl_v5
 
-linters-settings:
-  lll:
-    line-length: 160
+  settings:
+    lll:
+      line-length: 160
 
-  gocritic:
-    disabled-checks:
-      - ifElseChain
+    gocritic:
+      disabled-checks:
+        - ifElseChain
 
-issues:
-  exclude-rules:
-    # Exclude some linters from tests
-    - path: _test\.go
-      linters:
-        - funlen
-        - lll
-        - goconst
-        - err113
-        - dupl
-        - paralleltest
-        - gocognit
-        - maintidx
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
 
-    # Exclude some linters from mocks
-    - text: mock_
-      linters:
-        - nosnakecase
+    rules:
+      # Exclude some linters from tests
+      - path: _test\.go
+        linters:
+          - funlen
+          - lll
+          - goconst
+          - err113
+          - dupl
+          - paralleltest
+          - gocognit
+          - maintidx
+          - gosec
+          - errcheck
+
+      # Exclude some linters from mocks
+      - text: mock_
+        linters:
+          - nosnakecase

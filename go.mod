@@ -1,15 +1,15 @@
 module github.com/JosiahWitt/lambgo
 
-go 1.18
+go 1.21.0
 
 require (
 	github.com/JosiahWitt/ensure v0.5.0
 	github.com/JosiahWitt/erk v0.5.11
+	github.com/goccy/go-yaml v1.18.0
 	github.com/golang/mock v1.6.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/urfave/cli/v2 v2.27.7
 	golang.org/x/mod v0.5.1
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

@@ -34,7 +34,7 @@ func (*Runner) Exec(params *ExecParams) (string, error) {
 	if err != nil {
 		var exitErr *exec.ExitError
 		if errors.As(err, &exitErr) {
-			//nolint:goerr113
+			//nolint:err113
 			return "", errors.New(string(out))
 		}
 

@@ -18,11 +18,11 @@ func TestRunnerExec(t *testing.T) {
 		result, err := runner.Exec(&runcmd.ExecParams{
 			PWD:  "/tmp",
 			CMD:  "sh",
-			Args: []string{"-c", "pwd"},
+			Args: []string{"-c", "basename $PWD"},
 		})
 
 		ensure(err).IsNotError()
-		ensure(result).Equals("/tmp\n")
+		ensure(result).Equals("tmp\n")
 	})
 
 	ensure.Run("with environment variables", func(ensure ensuring.E) {
