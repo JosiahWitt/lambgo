@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/JosiahWitt/lambgo/internal/builder"
 	"github.com/JosiahWitt/lambgo/internal/lambgofile"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // App is the CLI application for lambgo.
@@ -17,7 +19,7 @@ type App struct {
 
 // Run the application given the os.Args array.
 func (a *App) Run(args []string) error {
-	cliApp := &cli.App{
+	cliApp := &cli.Command{
 		Name:    "lambgo",
 		Usage:   "A simple framework for building AWS Lambdas in Go.",
 		Version: a.Version,
@@ -27,5 +29,5 @@ func (a *App) Run(args []string) error {
 		},
 	}
 
-	return cliApp.Run(args)
+	return cliApp.Run(context.Background(), args)
 }

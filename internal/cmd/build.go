@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"runtime"
 	"sort"
 	"strconv"
@@ -8,7 +9,7 @@ import (
 
 	"github.com/JosiahWitt/erk"
 	"github.com/JosiahWitt/lambgo/internal/lambgofile"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 const (
@@ -57,7 +58,7 @@ func (a *App) buildCmd() *cli.Command {
 			},
 		},
 
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, cmd *cli.Command) error {
 			pwd, err := a.Getwd()
 			if err != nil {
 				return err
@@ -68,7 +69,7 @@ func (a *App) buildCmd() *cli.Command {
 				return err
 			}
 
-			if rawOnlyFlags := c.StringSlice("only"); len(rawOnlyFlags) > 0 {
+			if rawOnlyFlags := cmd.StringSlice("only"); len(rawOnlyFlags) > 0 {
 				filteredBuildPaths, err := filterBuildPaths(config.BuildPaths, rawOnlyFlags)
 				if err != nil {
 					return err
@@ -77,10 +78,10 @@ func (a *App) buildCmd() *cli.Command {
 				config.BuildPaths = filteredBuildPaths
 			}
 
-			if c.Bool("disable-parallel") {
+			if cmd.Bool("disable-parallel") {
 				config.NumParallel = 1
 			} else {
-				numParallel, err := parseNumParallel(config, c.String("num-parallel"))
+				numParallel, err := parseNumParallel(config, cmd.String("num-parallel"))
 				if err != nil {
 					return err
 				}
@@ -127,10 +128,6 @@ func filterBuildPaths(buildPaths []string, filters []string) ([]string, error) {
 }
 
 func parseNumParallel(config *lambgofile.Config, numParallel string) (int, error) {
-	if numParallel == "" {
-		return 0, erk.WithParams(ErrInvalidNumParallel, erk.Params{"numParallel": numParallel})
-	}
-
 	if numParallel == allParallel {
 		return len(config.BuildPaths), nil
 	}

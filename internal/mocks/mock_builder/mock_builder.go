@@ -52,11 +52,11 @@ func (m *MockLambdaBuilderAPI) BuildBinaries(_config *lambgofile.Config) error {
 //
 // Inputs:
 //
-//  config *lambgofile.Config
+//	config *lambgofile.Config
 //
 // Outputs:
 //
-//  error
+//	error
 func (mr *MockLambdaBuilderAPIMockRecorder) BuildBinaries(_config interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	inputs := []interface{}{_config}
