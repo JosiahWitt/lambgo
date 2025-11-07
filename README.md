@@ -43,6 +43,7 @@ outDirectory: tmp
 
 # Additional build flags passed to "go build"
 # For example, if you want to provide extra compiler or linker options
+# Supports environment variable expansion: $VAR or ${VAR}
 # buildFlags: -tags extra,tags -ldflags="-linker -flags"
 
 # Allow overriding the GOOS and GOARCH environment variables to

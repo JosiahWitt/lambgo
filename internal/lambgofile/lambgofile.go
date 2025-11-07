@@ -4,13 +4,14 @@ package lambgofile
 import (
 	"errors"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/JosiahWitt/erk"
 	"github.com/goccy/go-yaml"
-	"github.com/google/shlex"
 	"golang.org/x/mod/modfile"
+	"mvdan.cc/sh/v3/shell"
 )
 
 // ExampleFile for use in error messages and CLI help menus.
@@ -25,6 +26,7 @@ outDirectory: tmp
 
 # Additional build flags passed to "go build"
 # For example, if you want to provide extra compiler or linker options
+# Supports environment variable expansion: $VAR or ${VAR}
 # buildFlags: -tags extra,tags -ldflags="-linker -flags"
 
 # Allow overriding the GOOS and GOARCH environment variables to
@@ -125,7 +127,7 @@ func (l *Loader) LoadConfig(pwd string) (*Config, error) {
 	}
 
 	if config.RawBuildFlags != "" {
-		buildFlags, err := shlex.Split(config.RawBuildFlags)
+		buildFlags, err := shell.Fields(config.RawBuildFlags, os.Getenv)
 		if err != nil {
 			return nil, erk.WrapWith(ErrCannotParseFlags, err, erk.Params{
 				"flags": config.RawBuildFlags,

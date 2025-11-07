@@ -2,6 +2,11 @@
 # Optional, defaults to tmp.
 outDirectory: tmp
 
+# Additional build flags passed to "go build"
+# For example, if you want to provide extra compiler or linker options
+# Supports environment variable expansion: $VAR or ${VAR}
+buildFlags: -ldflags="-X 'main.Version=v1.2.3'"
+
 # Paths to build into Lambda zip files.
 # Each path should contain a main package.
 # The artifacts are built to: <outDirectory>/<buildPath>.zip
