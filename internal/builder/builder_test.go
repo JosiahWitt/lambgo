@@ -53,7 +53,11 @@ func TestBuildBinaries(t *testing.T) {
 				OutDirectory: "out/dir",
 				Goos:         "linux",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/path1", "lambdas/path2", "lambdas/path3"},
+				Lambdas: []*lambgofile.Lambda{
+					{Path: "lambdas/path1"},
+					{Path: "lambdas/path2"},
+					{Path: "lambdas/path3"},
+				},
 			},
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
@@ -102,10 +106,13 @@ func TestBuildBinaries(t *testing.T) {
 		{
 			Name: "with valid config with default outDirectory",
 			Config: &lambgofile.Config{
-				RootPath:   "/my/root",
-				Goos:       "linux",
-				Goarch:     "amd64",
-				BuildPaths: []string{"lambdas/path1", "lambdas/path2"},
+				RootPath: "/my/root",
+				Goos:     "linux",
+				Goarch:   "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					{Path: "lambdas/path1"},
+					{Path: "lambdas/path2"},
+				},
 			},
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
@@ -142,11 +149,13 @@ func TestBuildBinaries(t *testing.T) {
 		{
 			Name: "with valid config with build flags",
 			Config: &lambgofile.Config{
-				RootPath:   "/my/root",
-				BuildPaths: []string{"lambdas/path1", "lambdas/path2"},
-				Goos:       "linux",
-				Goarch:     "amd64",
-				BuildFlags: []string{"-extra", "-stuff"},
+				RootPath: "/my/root",
+				Goos:     "linux",
+				Goarch:   "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					{Path: "lambdas/path1", BuildFlags: []string{"-extra", "-stuff"}},
+					{Path: "lambdas/path2", BuildFlags: []string{"-extra", "-stuff"}},
+				},
 			},
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
@@ -188,7 +197,10 @@ func TestBuildBinaries(t *testing.T) {
 				ZippedFileName: "bootstrap",
 				Goos:           "linux",
 				Goarch:         "amd64",
-				BuildPaths:     []string{"lambdas/path1", "lambdas/path2"},
+				Lambdas: []*lambgofile.Lambda{
+					{Path: "lambdas/path1"},
+					{Path: "lambdas/path2"},
+				},
 			},
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
@@ -229,7 +241,9 @@ func TestBuildBinaries(t *testing.T) {
 				OutDirectory: "out/dir",
 				Goos:         "linux",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/path1"},
+				Lambdas: []*lambgofile.Lambda{
+					{Path: "lambdas/path1"},
+				},
 			},
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
@@ -256,7 +270,10 @@ func TestBuildBinaries(t *testing.T) {
 				OutDirectory: "out/dir",
 				Goos:         "plan9",
 				Goarch:       "arm64",
-				BuildPaths:   []string{"lambdas/path1", "lambdas/path2"},
+				Lambdas: []*lambgofile.Lambda{
+					{Path: "lambdas/path1"},
+					{Path: "lambdas/path2"},
+				},
 			},
 
 			AssembleMocks: func(m *Mocks) []*gomock.Call {
@@ -300,13 +317,60 @@ func TestBuildBinaries(t *testing.T) {
 		},
 
 		{
+			Name: "with per-lambda custom buildFlags",
+			Config: &lambgofile.Config{
+				RootPath:     "/my/root",
+				OutDirectory: "out/dir",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					{Path: "lambdas/api", BuildFlags: []string{"-tags", "prod"}},
+					{Path: "lambdas/worker", BuildFlags: []string{"-default", "-flags"}},
+				},
+			},
+
+			AssembleMocks: func(m *Mocks) []*gomock.Call {
+				return []*gomock.Call{
+					mockBuildDependencies(m, "./lambdas/api", "./lambdas/worker"),
+
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/api", "-tags", "prod", "./lambdas/api"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", nil),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/api", "api").Return(nil),
+
+					m.Cmd.EXPECT().Exec(&runcmd.ExecParams{
+						PWD:  "/my/root",
+						CMD:  "go",
+						Args: []string{"build", "-trimpath", "-o", "out/dir/lambdas/worker", "-default", "-flags", "./lambdas/worker"},
+
+						EnvVars: map[string]string{
+							"GOOS":   "linux",
+							"GOARCH": "amd64",
+						},
+					}).Return("", nil),
+					m.Zip.EXPECT().ZipFile("out/dir/lambdas/worker", "worker").Return(nil),
+				}
+			},
+		},
+
+		{
 			Name: "with error running go build for the dependencies",
 			Config: &lambgofile.Config{
 				RootPath:     "/my/root",
 				OutDirectory: "out/dir",
 				Goos:         "linux",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/path1", "lambdas/path2"},
+				Lambdas: []*lambgofile.Lambda{
+					{Path: "lambdas/path1"},
+					{Path: "lambdas/path2"},
+				},
 			},
 			ExpectedError: builder.ErrGoBuildDependenciesFailed,
 
@@ -333,7 +397,10 @@ func TestBuildBinaries(t *testing.T) {
 				OutDirectory: "out/dir",
 				Goos:         "linux",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/path1", "lambdas/path2"},
+				Lambdas: []*lambgofile.Lambda{
+					{Path: "lambdas/path1"},
+					{Path: "lambdas/path2"},
+				},
 			},
 			ExpectedError: builder.ErrGoBuildFailed,
 
@@ -373,7 +440,10 @@ func TestBuildBinaries(t *testing.T) {
 				OutDirectory: "out/dir",
 				Goos:         "linux",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/path1", "lambdas/path2"},
+				Lambdas: []*lambgofile.Lambda{
+					{Path: "lambdas/path1"},
+					{Path: "lambdas/path2"},
+				},
 			},
 			ExpectedError: builder.ErrZipFailed,
 
@@ -437,7 +507,7 @@ func TestBuildBinaries(t *testing.T) {
 		ensure.RunTableByIndex(table, func(ensure ensuring.E, i int) {
 			entry := table[i]
 			entry.Subject.Logger = log.New(io.Discard, "", 0)
-			entry.Config.NumParallel = len(entry.Config.BuildPaths)
+			entry.Config.NumParallel = len(entry.Config.Lambdas)
 			entry.AssembleMocks(entry.Mocks)
 
 			err := entry.Subject.BuildBinaries(entry.Config)

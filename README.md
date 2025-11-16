@@ -41,9 +41,10 @@ outDirectory: tmp
 # Optional, defaults to the name of the Lambda's directory.
 # zippedFileName: bootstrap
 
-# Additional build flags passed to "go build"
-# For example, if you want to provide extra compiler or linker options
-# Supports environment variable expansion: $VAR or ${VAR}
+# Additional build flags passed to "go build".
+# For example, if you want to provide extra compiler or linker options.
+# Supports environment variable expansion: $VAR or ${VAR}.
+# This serves as the default for all lambdas unless overridden per-lambda.
 # buildFlags: -tags extra,tags -ldflags="-linker -flags"
 
 # Allow overriding the GOOS and GOARCH environment variables to
@@ -52,15 +53,24 @@ outDirectory: tmp
 # goos: linux
 # goarch: amd64
 
+# Option 1: Simple paths
 # Paths to build into Lambda zip files.
 # Each path should contain a main package.
 # The artifacts are built to: <outDirectory>/<buildPath>.zip
 buildPaths:
   - lambdas/hello_world
+
+# Option 2: Per-lambda configuration with custom build flags.
+lambdas:
+  - path: lambdas/api
+    buildFlags: -tags prod -ldflags="-s -w"
+  - path: lambdas/worker
+    buildFlags: "" # Forces no flags, even if some are defined on the top-level option
+  - path: lambdas/simple
+    # Inherits top-level buildFlags if not specified
+
+# Both buildPaths and lambdas can be used together, but duplicate paths will result in an error.
 ```
-
-Using the above example file would cause `lambgo build` to build `lambdas/hello_world` to `tmp/lambdas/hello_world.zip`.
-
 
 ## Examples
 See the [`examples` directory](./examples) for examples.
