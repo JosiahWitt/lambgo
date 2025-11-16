@@ -21,7 +21,7 @@ func TestLoadConfig(t *testing.T) {
 		FS *mock_fs.MockReadFileFS
 	}
 
-	type mapFS map[string]interface{}
+	type mapFS map[string]any
 	setupMapFS := func(mapFS mapFS) func(*Mocks) {
 		return func(m *Mocks) {
 			m.FS.EXPECT().ReadFile(gomock.Any()).AnyTimes().
@@ -67,7 +67,12 @@ func TestLoadConfig(t *testing.T) {
 				OutDirectory: "tmp",
 				Goos:         "linux",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/hello_world"},
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", nil),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", nil),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -87,7 +92,12 @@ func TestLoadConfig(t *testing.T) {
 				OutDirectory: "tmp",
 				Goos:         "linux",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/hello_world"},
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", nil),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", nil),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -108,7 +118,12 @@ func TestLoadConfig(t *testing.T) {
 				OutDirectory:   "tmp",
 				Goos:           "linux",
 				Goarch:         "amd64",
-				BuildPaths:     []string{"lambdas/hello_world"},
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", nil),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", nil),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -125,14 +140,17 @@ zippedFileName: some-name
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-foo -bar "baz qux"`,
-				BuildFlags:    []string{"-foo", "-bar", "baz qux"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-foo", "-bar", "baz qux"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-foo", "-bar", "baz qux"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -149,14 +167,17 @@ buildFlags: -foo -bar "baz qux"
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-flag ""`,
-				BuildFlags:    []string{"-flag", ""},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-flag", ""}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-flag", ""}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -173,14 +194,17 @@ buildFlags: -flag ""
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-flag 'value with spaces'`,
-				BuildFlags:    []string{"-flag", "value with spaces"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-flag", "value with spaces"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-flag", "value with spaces"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -197,14 +221,17 @@ buildFlags: -flag 'value with spaces'
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-flag "value with \"nested\" quotes"`,
-				BuildFlags:    []string{"-flag", `value with "nested" quotes`},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-flag", `value with "nested" quotes`}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-flag", `value with "nested" quotes`}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -221,14 +248,17 @@ buildFlags: -flag "value with \"nested\" quotes"
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-flag    value    -other`,
-				BuildFlags:    []string{"-flag", "value", "-other"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-flag", "value", "-other"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-flag", "value", "-other"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -245,14 +275,17 @@ buildFlags: -flag    value    -other
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-ldflags="-X main.version=1.0.0" -tags=prod,dev`,
-				BuildFlags:    []string{"-ldflags=-X main.version=1.0.0", "-tags=prod,dev"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-ldflags=-X main.version=1.0.0", "-tags=prod,dev"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-ldflags=-X main.version=1.0.0", "-tags=prod,dev"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -269,14 +302,17 @@ buildFlags: -ldflags="-X main.version=1.0.0" -tags=prod,dev
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-flag1 "double quotes" -flag2 'single quotes'`,
-				BuildFlags:    []string{"-flag1", "double quotes", "-flag2", "single quotes"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-flag1", "double quotes", "-flag2", "single quotes"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-flag1", "double quotes", "-flag2", "single quotes"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -293,14 +329,17 @@ buildFlags: -flag1 "double quotes" -flag2 'single quotes'
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-ldflags "-X main.version=$UNDEFINED_VAR" -tags $ALSO_UNDEFINED`,
-				BuildFlags:    []string{"-ldflags", "-X main.version=", "-tags"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-ldflags", "-X main.version=", "-tags"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-ldflags", "-X main.version=", "-tags"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -317,14 +356,17 @@ buildFlags: -ldflags "-X main.version=$UNDEFINED_VAR" -tags $ALSO_UNDEFINED
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-ldflags "-X main.version=\$VERSION" -tags \$BUILD_TAGS`,
-				BuildFlags:    []string{"-ldflags", "-X main.version=$VERSION", "-tags", "$BUILD_TAGS"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-ldflags", "-X main.version=$VERSION", "-tags", "$BUILD_TAGS"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-ldflags", "-X main.version=$VERSION", "-tags", "$BUILD_TAGS"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -341,14 +383,17 @@ buildFlags: -ldflags "-X main.version=\$VERSION" -tags \$BUILD_TAGS
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-flag value`,
-				BuildFlags:    []string{"-flag", "value"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-flag", "value"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-flag", "value"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -365,14 +410,17 @@ buildFlags:   -flag value
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-flag value\ with\ spaces`,
-				BuildFlags:    []string{"-flag", "value with spaces"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-flag", "value with spaces"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-flag", "value with spaces"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -389,14 +437,17 @@ buildFlags: -flag value\ with\ spaces
 			PWD: "/my/app",
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-tags netgo,osusergo -ldflags="-s -w -X main.version=v1.2.3"`,
-				BuildFlags:    []string{"-tags", "netgo,osusergo", "-ldflags=-s -w -X main.version=v1.2.3"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-tags", "netgo,osusergo", "-ldflags=-s -w -X main.version=v1.2.3"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-tags", "netgo,osusergo", "-ldflags=-s -w -X main.version=v1.2.3"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -416,14 +467,17 @@ buildFlags: -tags netgo,osusergo -ldflags="-s -w -X main.version=v1.2.3"
 			},
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-ldflags "-X main.version=$VERSION"`,
-				BuildFlags:    []string{"-ldflags", "-X main.version=v1.2.3"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-ldflags", "-X main.version=v1.2.3"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-ldflags", "-X main.version=v1.2.3"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -445,14 +499,17 @@ buildFlags: -ldflags "-X main.version=$VERSION"
 			},
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-ldflags "-X main.version=$VERSION -X main.commit=$GIT_COMMIT" -tags $BUILD_TAGS`,
-				BuildFlags:    []string{"-ldflags", "-X main.version=v2.0.0 -X main.commit=abc123", "-tags", "prod,netgo"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-ldflags", "-X main.version=v2.0.0 -X main.commit=abc123", "-tags", "prod,netgo"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-ldflags", "-X main.version=v2.0.0 -X main.commit=abc123", "-tags", "prod,netgo"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -472,14 +529,17 @@ buildFlags: -ldflags "-X main.version=$VERSION -X main.commit=$GIT_COMMIT" -tags
 			},
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-ldflags "-X main.version=${VERSION}"`,
-				BuildFlags:    []string{"-ldflags", "-X main.version=v3.0.0"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-ldflags", "-X main.version=v3.0.0"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-ldflags", "-X main.version=v3.0.0"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -500,14 +560,17 @@ buildFlags: -ldflags "-X main.version=${VERSION}"
 			},
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-flag1=${VAR1:-default1} -flag2=${VAR2:-default2}`,
-				BuildFlags:    []string{"-flag1=set", "-flag2=default2"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-flag1=set", "-flag2=default2"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-flag1=set", "-flag2=default2"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -528,14 +591,17 @@ buildFlags: -flag1=${VAR1:-default1} -flag2=${VAR2:-default2}
 			},
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-tags netgo -ldflags "-X main.version=$VERSION -X main.literal=\$LITERAL"`,
-				BuildFlags:    []string{"-tags", "netgo", "-ldflags", "-X main.version=v1.0.0 -X main.literal=$LITERAL"},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-tags", "netgo", "-ldflags", "-X main.version=v1.0.0 -X main.literal=$LITERAL"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-tags", "netgo", "-ldflags", "-X main.version=v1.0.0 -X main.literal=$LITERAL"}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -555,14 +621,17 @@ buildFlags: -tags netgo -ldflags "-X main.version=$VERSION -X main.literal=\$LIT
 			},
 
 			ExpectedConfig: &lambgofile.Config{
-				RootPath:      "/my/app",
-				ModulePath:    "github.com/my/app",
-				RawBuildFlags: `-ldflags "-X main.set=$SET_VAR -X main.unset=$UNSET_VAR"`,
-				BuildFlags:    []string{"-ldflags", "-X main.set=set_value -X main.unset="},
-				OutDirectory:  "tmp",
-				Goos:          "linux",
-				Goarch:        "amd64",
-				BuildPaths:    []string{"lambdas/hello_world"},
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", []string{"-ldflags", "-X main.set=set_value -X main.unset="}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-ldflags", "-X main.set=set_value -X main.unset="}),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -584,7 +653,12 @@ buildFlags: -ldflags "-X main.set=$SET_VAR -X main.unset=$UNSET_VAR"
 				OutDirectory: "tmp",
 				Goos:         "plan9",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/hello_world"},
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", nil),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", nil),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -605,7 +679,12 @@ goos: plan9
 				OutDirectory: "tmp",
 				Goos:         "linux",
 				Goarch:       "arm64",
-				BuildPaths:   []string{"lambdas/hello_world"},
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", nil),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", nil),
+				},
 			},
 
 			SetupMocks: setupMapFS(mapFS{
@@ -627,7 +706,11 @@ goarch: arm64
 				OutDirectory: "tmp",
 				Goos:         "linux",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/hello_world", "lambdas/goodbye_world", "functions/my_function"},
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/hello_world", nil),
+					makeLambda("lambdas/goodbye_world", nil),
+					makeLambda("functions/my_function", nil),
+				},
 			},
 			SetupMocks: setupMapFS(mapFS{
 				"my/app/go.mod": defaultGoModFile,
@@ -642,20 +725,229 @@ buildPaths:
 		},
 
 		{
+			Name: "with valid config using lambdas field only",
+
+			PWD: "/my/app",
+
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/api", nil),
+					makeLambda("lambdas/worker", nil),
+				},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+lambdas:
+  - path: lambdas/api
+  - path: lambdas/worker
+`,
+			}),
+		},
+
+		{
+			Name: "with lambdas field having custom buildFlags",
+
+			PWD: "/my/app",
+
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/api", []string{"-tags", "prod"}),
+					makeLambda("lambdas/worker", []string{"-ldflags=-s -w"}),
+				},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildFlags: -ldflags="-s -w"
+lambdas:
+  - path: lambdas/api
+    buildFlags: -tags prod
+  - path: lambdas/worker
+`,
+			}),
+		},
+
+		{
+			Name: "with lambdas field having empty buildFlags",
+
+			PWD: "/my/app",
+
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/api", nil)},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildFlags: -ldflags="-s -w"
+lambdas:
+  - path: lambdas/api
+    buildFlags: ""
+`,
+			}),
+		},
+
+		{
+			Name: "with both buildPaths and lambdas fields",
+
+			PWD: "/my/app",
+
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/legacy", nil),
+					makeLambda("lambdas/api", nil),
+				},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildPaths:
+  - lambdas/legacy
+lambdas:
+  - path: lambdas/api
+`,
+			}),
+		},
+
+		{
+			Name: "with lambdas field with environment variable expansion",
+
+			PWD: "/my/app",
+			EnvVars: map[string]string{
+				"VERSION": "v1.0.0",
+			},
+
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/api", []string{"-ldflags", "-X main.version=v1.0.0"})},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+lambdas:
+  - path: lambdas/api
+    buildFlags: -ldflags "-X main.version=$VERSION"
+`,
+			}),
+		},
+
+		{
+			Name: "with lambdas field with complex buildFlags",
+
+			PWD: "/my/app",
+
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/api", []string{"-tags", "netgo,osusergo", "-ldflags=-s -w -X main.version=v1.2.3"})},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+lambdas:
+  - path: lambdas/api
+    buildFlags: -tags netgo,osusergo -ldflags="-s -w -X main.version=v1.2.3"
+`,
+			}),
+		},
+
+		{
+			Name: "with multiple lambdas with mixed buildFlags scenarios",
+
+			PWD: "/my/app",
+
+			ExpectedConfig: &lambgofile.Config{
+				RootPath:     "/my/app",
+				ModulePath:   "github.com/my/app",
+				OutDirectory: "tmp",
+				Goos:         "linux",
+				Goarch:       "amd64",
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/api", []string{"-tags", "prod"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-ldflags=-s -w"}),
+				},
+			},
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildFlags: -ldflags="-s -w"
+lambdas:
+  - path: lambdas/api
+    buildFlags: -tags prod
+  - path: lambdas/worker
+    buildFlags: ""
+  - path: lambdas/simple
+`,
+			}),
+		},
+
+		{
 			Name: "with complex config including all fields and comments",
 
 			PWD: "/my/app",
+			EnvVars: map[string]string{
+				"VERSION":    "v2.0.0",
+				"GIT_COMMIT": "abc123",
+			},
 
 			ExpectedConfig: &lambgofile.Config{
 				RootPath:       "/my/app",
 				ModulePath:     "github.com/my/app",
 				OutDirectory:   "build",
 				ZippedFileName: "bootstrap",
-				RawBuildFlags:  `-tags prod -ldflags="-s -w"`,
-				BuildFlags:     []string{"-tags", "prod", "-ldflags=-s -w"},
 				Goos:           "linux",
 				Goarch:         "arm64",
-				BuildPaths:     []string{"lambdas/api", "lambdas/worker"},
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/legacy", []string{"-ldflags=-s -w"}),
+					makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w -X main.version=v2.0.0 -X main.commit=abc123"}),
+					makeLambda("lambdas/worker", nil),
+					makeLambda("lambdas/simple", []string{"-ldflags=-s -w"}),
+				},
 			},
 			SetupMocks: setupMapFS(mapFS{
 				"my/app/go.mod": defaultGoModFile,
@@ -667,7 +959,7 @@ outDirectory: build
 zippedFileName: bootstrap
 
 # Build flags for production
-buildFlags: -tags prod -ldflags="-s -w"
+buildFlags: -ldflags="-s -w"
 
 # Target ARM64 architecture
 goos: linux
@@ -675,13 +967,16 @@ goarch: arm64
 
 # Lambda functions to build
 buildPaths:
-  - lambdas/api
-  - lambdas/worker
+  - lambdas/legacy
+lambdas:
+  - path: lambdas/api
+    buildFlags: -tags prod -ldflags="-s -w -X main.version=$VERSION -X main.commit=$GIT_COMMIT"
+  - path: lambdas/worker
+    buildFlags: ""
+  - path: lambdas/simple
 `,
 			}),
-		},
-
-		{
+		}, {
 			Name: "with various whitespace and formatting",
 
 			PWD: "/my/app",
@@ -692,7 +987,10 @@ buildPaths:
 				OutDirectory: "output",
 				Goos:         "linux",
 				Goarch:       "amd64",
-				BuildPaths:   []string{"lambdas/func1", "lambdas/func2"},
+				Lambdas: []*lambgofile.Lambda{
+					makeLambda("lambdas/func1", nil),
+					makeLambda("lambdas/func2", nil),
+				},
 			},
 			SetupMocks: setupMapFS(mapFS{
 				"my/app/go.mod": defaultGoModFile,
@@ -791,6 +1089,234 @@ buildPaths:
 				"my/app/.lambgo.yml": "buildFlags: foo'",
 			}),
 		},
+
+		{
+			Name: "when duplicate path between buildPaths and lambdas",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrDuplicatePaths,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildPaths:
+  - lambdas/duplicate
+lambdas:
+  - path: lambdas/duplicate
+`,
+			}),
+		},
+
+		{
+			Name: "when duplicate path within lambdas array",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrDuplicatePaths,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+lambdas:
+  - path: lambdas/duplicate
+  - path: lambdas/duplicate
+`,
+			}),
+		},
+
+		{
+			Name: "when duplicate path within buildPaths array",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrDuplicatePaths,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildPaths:
+  - lambdas/duplicate
+  - lambdas/duplicate
+`,
+			}),
+		},
+
+		{
+			Name: "when multiple duplicate paths",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrDuplicatePaths,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildPaths:
+  - lambdas/dup1
+  - lambdas/dup1
+  - lambdas/dup2
+lambdas:
+  - path: lambdas/dup2
+`,
+			}),
+		},
+
+		{
+			Name: "when paths differ only by leading ./",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrDuplicatePaths,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildPaths:
+  - lambdas/hello_world
+  - ./lambdas/hello_world
+`,
+			}),
+		},
+
+		{
+			Name: "when paths differ only by trailing /",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrDuplicatePaths,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildPaths:
+  - lambdas/hello_world
+  - lambdas/hello_world/
+`,
+			}),
+		},
+
+		{
+			Name: "when paths have multiple variations that normalize to same path",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrDuplicatePaths,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildPaths:
+  - ./lambdas/api
+  - lambdas/api/
+lambdas:
+  - path: lambdas/api
+`,
+			}),
+		},
+
+		{
+			Name: "when buildPath is empty",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrEmptyLambdaPath,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+buildPaths:
+  - ""
+`,
+			}),
+		},
+
+		{
+			Name: "when lambda has empty path",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrEmptyLambdaPath,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+lambdas:
+  - path: ""
+    buildFlags: -tags prod
+`,
+			}),
+		},
+
+		{
+			Name: "when lambdas section has paths with leading ./ that normalize to same path",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrDuplicatePaths,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+lambdas:
+  - path: lambdas/api
+    buildFlags: -tags prod
+  - path: ./lambdas/api
+    buildFlags: -tags dev
+`,
+			}),
+		},
+
+		{
+			Name: "when lambdas section has paths with trailing / that normalize to same path",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrDuplicatePaths,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+lambdas:
+  - path: lambdas/worker
+  - path: lambdas/worker/
+    buildFlags: ""
+`,
+			}),
+		},
+
+		{
+			Name: "when lambda has missing path field",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrEmptyLambdaPath,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+lambdas:
+  - buildFlags: -tags prod
+`,
+			}),
+		},
+
+		{
+			Name: "when per-lambda buildFlags has invalid syntax",
+
+			PWD:           "/my/app",
+			ExpectedError: lambgofile.ErrCannotParsePerLambdaFlags,
+
+			SetupMocks: setupMapFS(mapFS{
+				"my/app/go.mod": defaultGoModFile,
+				"my/app/.lambgo.yml": `
+outDirectory: tmp
+lambdas:
+  - path: lambdas/api
+    buildFlags: foo'
+`,
+			}),
+		},
 	}
 
 	ensure.RunTableByIndex(table, func(ensure ensuring.E, i int) {
@@ -804,4 +1330,11 @@ buildPaths:
 		ensure(err).IsError(entry.ExpectedError)
 		ensure(config).Equals(entry.ExpectedConfig)
 	})
+}
+
+func makeLambda(path string, buildFlags []string) *lambgofile.Lambda {
+	return &lambgofile.Lambda{
+		Path:       path,
+		BuildFlags: buildFlags,
+	}
 }

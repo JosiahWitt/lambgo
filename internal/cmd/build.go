@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"runtime"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -58,82 +58,95 @@ func (a *App) buildCmd() *cli.Command {
 			},
 		},
 
-		Action: func(ctx context.Context, cmd *cli.Command) error {
-			pwd, err := a.Getwd()
-			if err != nil {
-				return err
-			}
-
-			config, err := a.LambgoFileLoader.LoadConfig(pwd)
-			if err != nil {
-				return err
-			}
-
-			if rawOnlyFlags := cmd.StringSlice("only"); len(rawOnlyFlags) > 0 {
-				filteredBuildPaths, err := filterBuildPaths(config.BuildPaths, rawOnlyFlags)
-				if err != nil {
-					return err
-				}
-
-				config.BuildPaths = filteredBuildPaths
-			}
-
-			if cmd.Bool("disable-parallel") {
-				config.NumParallel = 1
-			} else {
-				numParallel, err := parseNumParallel(config, cmd.String("num-parallel"))
-				if err != nil {
-					return err
-				}
-
-				config.NumParallel = numParallel
-			}
-
-			return a.Builder.BuildBinaries(config)
-		},
+		Action: a.runBuild,
 	}
 }
 
-func filterBuildPaths(buildPaths []string, filters []string) ([]string, error) {
-	filteredBuildPathsMap := map[string]bool{}
+func (a *App) runBuild(ctx context.Context, cmd *cli.Command) error {
+	pwd, err := a.Getwd()
+	if err != nil {
+		return err
+	}
+
+	config, err := a.LambgoFileLoader.LoadConfig(pwd)
+	if err != nil {
+		return err
+	}
+
+	if rawOnlyFlags := cmd.StringSlice("only"); len(rawOnlyFlags) > 0 {
+		filteredLambdas, err := filterLambdas(config.Lambdas, rawOnlyFlags)
+		if err != nil {
+			return err
+		}
+
+		config.Lambdas = filteredLambdas
+	}
+
+	if cmd.Bool("disable-parallel") {
+		config.NumParallel = 1
+	} else {
+		numParallel, err := parseNumParallel(config, cmd.String("num-parallel"))
+		if err != nil {
+			return err
+		}
+
+		config.NumParallel = numParallel
+	}
+
+	return a.Builder.BuildBinaries(config)
+}
+
+func filterLambdas(lambdas []*lambgofile.Lambda, filters []string) ([]*lambgofile.Lambda, error) {
+	matched := make([]*lambgofile.Lambda, 0, len(lambdas))
+	seenPaths := make(map[string]struct{}, len(lambdas))
 
 	for _, filter := range filters {
 		foundMatch := false
 		filterIsDir := strings.HasSuffix(filter, "/")
 
-		for _, buildPath := range buildPaths {
-			isChild := filterIsDir && strings.HasPrefix(buildPath, filter)
+		for _, lambda := range lambdas {
+			isChild := filterIsDir && strings.HasPrefix(lambda.Path, filter)
 
-			if buildPath == filter || isChild {
-				filteredBuildPathsMap[buildPath] = true
+			if lambda.Path == filter || isChild {
 				foundMatch = true
+
+				if _, seen := seenPaths[lambda.Path]; !seen {
+					matched = append(matched, lambda)
+					seenPaths[lambda.Path] = struct{}{}
+				}
 			}
 		}
 
 		if !foundMatch {
 			return nil, erk.WithParams(ErrCannotFilterBuildPaths, erk.Params{
 				"filter":     filter,
-				"buildPaths": buildPaths,
+				"buildPaths": extractLambdaPaths(lambdas),
 			})
 		}
 	}
 
-	filteredBuildPaths := make([]string, 0, len(filteredBuildPathsMap))
-	for buildPath := range filteredBuildPathsMap {
-		filteredBuildPaths = append(filteredBuildPaths, buildPath)
+	slices.SortFunc(matched, func(a, b *lambgofile.Lambda) int {
+		return strings.Compare(a.Path, b.Path)
+	})
+
+	return matched, nil
+}
+
+func extractLambdaPaths(lambdas []*lambgofile.Lambda) []string {
+	paths := make([]string, 0, len(lambdas))
+	for _, lambda := range lambdas {
+		paths = append(paths, lambda.Path)
 	}
 
-	sort.Strings(filteredBuildPaths)
-	return filteredBuildPaths, nil
+	return paths
 }
 
 func parseNumParallel(config *lambgofile.Config, numParallel string) (int, error) {
 	if numParallel == allParallel {
-		return len(config.BuildPaths), nil
+		return len(config.Lambdas), nil
 	}
 
-	if strings.HasSuffix(numParallel, cpuParallelSuffix) {
-		prefix := strings.TrimSuffix(numParallel, cpuParallelSuffix)
+	if prefix, matched := strings.CutSuffix(numParallel, cpuParallelSuffix); matched {
 		cpuMultiplier, err := strconv.ParseFloat(prefix, 64)
 		if err != nil {
 			return 0, erk.WrapWith(ErrInvalidNumParallel, err, erk.Params{"numParallel": numParallel})

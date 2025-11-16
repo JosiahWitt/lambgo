@@ -43,15 +43,23 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
 						NumParallel: 3,
 						RootPath:    "/some/root/path",
-						BuildPaths:  []string{"path1", "path2", "path3"},
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}).
 					Return(nil)
 			},
@@ -65,15 +73,23 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
 						NumParallel: 1,
 						RootPath:    "/some/root/path",
-						BuildPaths:  []string{"path1", "path2", "path3"},
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}).
 					Return(nil)
 			},
@@ -86,15 +102,23 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
 						NumParallel: 1,
 						RootPath:    "/some/root/path",
-						BuildPaths:  []string{"path1", "path2", "path3"},
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}).
 					Return(nil)
 			},
@@ -108,15 +132,23 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"first/0", "abc/123", "xyz/456", "qwerty/789"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("first/0", nil),
+							makeLambda("abc/123", nil),
+							makeLambda("xyz/456", nil),
+							makeLambda("qwerty/789", nil),
+						},
 					}, nil)
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
 						NumParallel: 2,
 						RootPath:    "/some/root/path",
-						BuildPaths:  []string{"abc/123", "xyz/456"},
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("abc/123", nil),
+							makeLambda("xyz/456", nil),
+						},
 					}).
 					Return(nil)
 			},
@@ -130,15 +162,26 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"first/0", "abc/123", "xyz/456", "qwerty/789", "nested/one", "nested/two"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("first/0", nil),
+							makeLambda("abc/123", nil),
+							makeLambda("xyz/456", nil),
+							makeLambda("qwerty/789", nil),
+							makeLambda("nested/one", nil),
+							makeLambda("nested/two", nil),
+						},
 					}, nil)
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
 						NumParallel: 3,
 						RootPath:    "/some/root/path",
-						BuildPaths:  []string{"nested/one", "nested/two", "xyz/456"},
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("nested/one", nil),
+							makeLambda("nested/two", nil),
+							makeLambda("xyz/456", nil),
+						},
 					}).
 					Return(nil)
 			},
@@ -152,15 +195,23 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
 						NumParallel: 3,
 						RootPath:    "/some/root/path",
-						BuildPaths:  []string{"path1", "path2", "path3"},
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}).
 					Return(nil)
 			},
@@ -173,15 +224,23 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
 						NumParallel: 2,
 						RootPath:    "/some/root/path",
-						BuildPaths:  []string{"path1", "path2", "path3"},
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}).
 					Return(nil)
 			},
@@ -194,15 +253,135 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 
 				m.Builder.EXPECT().
 					BuildBinaries(&lambgofile.Config{
 						NumParallel: int(1.5 * float64(runtime.NumCPU())),
 						RootPath:    "/some/root/path",
-						BuildPaths:  []string{"path1", "path2", "path3"},
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
+					}).
+					Return(nil)
+			},
+		},
+
+		{
+			Name:  "with valid execution: filter using --only flag with per-lambda buildFlags",
+			Flags: []string{"--only", "lambdas/api"},
+			Getwd: defaultWd,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("lambdas/api", []string{"-tags", "prod"}),
+							makeLambda("lambdas/worker", []string{"-ldflags", "-s"}),
+							makeLambda("lambdas/simple", nil),
+						},
+					}, nil)
+
+				m.Builder.EXPECT().
+					BuildBinaries(&lambgofile.Config{
+						NumParallel: 1,
+						RootPath:    "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("lambdas/api", []string{"-tags", "prod"}),
+						},
+					}).
+					Return(nil)
+			},
+		},
+		{
+			Name:  "with valid execution: filter using --only flag with directory and mixed buildFlags",
+			Flags: []string{"--only", "lambdas/"},
+			Getwd: defaultWd,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("lambdas/api", []string{"-tags", "prod"}),
+							makeLambda("lambdas/worker", []string{"-ldflags", "-s"}),
+							makeLambda("lambdas/simple", nil),
+							makeLambda("functions/other", []string{"-tags", "dev"}),
+						},
+					}, nil)
+
+				m.Builder.EXPECT().
+					BuildBinaries(&lambgofile.Config{
+						NumParallel: 3,
+						RootPath:    "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("lambdas/api", []string{"-tags", "prod"}),
+							makeLambda("lambdas/simple", nil),
+							makeLambda("lambdas/worker", []string{"-ldflags", "-s"}),
+						},
+					}).
+					Return(nil)
+			},
+		},
+		{
+			Name:  "with valid execution: filter multiple lambdas with different buildFlags",
+			Flags: []string{"--only", "lambdas/api", "--only", "functions/other"},
+			Getwd: defaultWd,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+							makeLambda("lambdas/worker", nil),
+							makeLambda("functions/other", []string{"-tags", "dev"}),
+						},
+					}, nil)
+
+				m.Builder.EXPECT().
+					BuildBinaries(&lambgofile.Config{
+						NumParallel: 2,
+						RootPath:    "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("functions/other", []string{"-tags", "dev"}),
+							makeLambda("lambdas/api", []string{"-tags", "prod", "-ldflags=-s -w"}),
+						},
+					}).
+					Return(nil)
+			},
+		},
+		{
+			Name:  "with valid execution: filter preserves empty buildFlags override",
+			Flags: []string{"--only", "lambdas/worker"},
+			Getwd: defaultWd,
+			SetupMocks: func(m *Mocks) {
+				m.LambgoFileLoader.EXPECT().
+					LoadConfig("/test").
+					Return(&lambgofile.Config{
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("lambdas/api", []string{"-tags", "prod"}),
+							makeLambda("lambdas/worker", nil),
+						},
+					}, nil)
+
+				m.Builder.EXPECT().
+					BuildBinaries(&lambgofile.Config{
+						NumParallel: 1,
+						RootPath:    "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("lambdas/worker", nil),
+						},
 					}).
 					Return(nil)
 			},
@@ -234,7 +413,10 @@ func TestBuild(t *testing.T) {
 					Return(&lambgofile.Config{
 						NumParallel: 2,
 						RootPath:    "/some/root/path",
-						BuildPaths:  []string{"abc/123", "xyz/456"},
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("abc/123", nil),
+							makeLambda("xyz/456", nil),
+						},
 					}, nil)
 			},
 		},
@@ -248,8 +430,12 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 			},
 		},
@@ -262,8 +448,12 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 			},
 		},
@@ -276,8 +466,12 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 			},
 		},
@@ -290,8 +484,12 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 			},
 		},
@@ -304,8 +502,12 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 			},
 		},
@@ -318,8 +520,12 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 			},
 		},
@@ -332,8 +538,12 @@ func TestBuild(t *testing.T) {
 				m.LambgoFileLoader.EXPECT().
 					LoadConfig("/test").
 					Return(&lambgofile.Config{
-						RootPath:   "/some/root/path",
-						BuildPaths: []string{"path1", "path2", "path3"},
+						RootPath: "/some/root/path",
+						Lambdas: []*lambgofile.Lambda{
+							makeLambda("path1", nil),
+							makeLambda("path2", nil),
+							makeLambda("path3", nil),
+						},
 					}, nil)
 			},
 		},
@@ -365,4 +575,11 @@ func TestBuild(t *testing.T) {
 		err := entry.Subject.Run(append([]string{"lambgo", "build"}, entry.Flags...))
 		ensure(err).IsError(entry.ExpectedError)
 	})
+}
+
+func makeLambda(path string, buildFlags []string) *lambgofile.Lambda {
+	return &lambgofile.Lambda{
+		Path:       path,
+		BuildFlags: buildFlags,
+	}
 }

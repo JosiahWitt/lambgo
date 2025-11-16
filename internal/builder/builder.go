@@ -60,19 +60,19 @@ func (b *LambdaBuilder) BuildBinaries(config *lambgofile.Config) error {
 	}
 
 	b.Logger.Println()
-	if len(config.BuildPaths) == 1 {
+	if len(config.Lambdas) == 1 {
 		b.Logger.Println("Building 1 Lambda")
 	} else if config.NumParallel == 1 {
-		b.Logger.Printf("Building %d Lambdas one at a time:\n", len(config.BuildPaths))
-	} else if config.NumParallel == len(config.BuildPaths) {
-		b.Logger.Printf("Building %d Lambdas all at once:\n", len(config.BuildPaths))
+		b.Logger.Printf("Building %d Lambdas one at a time:\n", len(config.Lambdas))
+	} else if config.NumParallel == len(config.Lambdas) {
+		b.Logger.Printf("Building %d Lambdas all at once:\n", len(config.Lambdas))
 	} else {
-		b.Logger.Printf("Building %d Lambdas in parallel groups of %d:\n", len(config.BuildPaths), config.NumParallel)
+		b.Logger.Printf("Building %d Lambdas in parallel groups of %d:\n", len(config.Lambdas), config.NumParallel)
 	}
 
-	for _, buildPath := range config.BuildPaths {
+	for _, lambda := range config.Lambdas {
 		sharedParams.wg.Add(1)
-		ch <- &builderParams{buildPath: buildPath, sharedBuilderParams: sharedParams}
+		ch <- &builderParams{lambda: lambda, sharedBuilderParams: sharedParams}
 	}
 
 	sharedParams.wg.Wait()
@@ -88,13 +88,13 @@ func (b *LambdaBuilder) BuildBinaries(config *lambgofile.Config) error {
 func (b *LambdaBuilder) buildDependencies(config *lambgofile.Config) error {
 	// Skip building dependencies when there is only one Lambda, otherwise it will
 	// build the executable instead of only populating the build cache
-	if len(config.BuildPaths) < 2 { //nolint:mnd
+	if len(config.Lambdas) < 2 { //nolint:mnd
 		return nil
 	}
 
-	buildPaths := make([]string, 0, len(config.BuildPaths))
-	for _, buildPath := range config.BuildPaths {
-		buildPaths = append(buildPaths, "./"+buildPath)
+	buildPaths := make([]string, 0, len(config.Lambdas))
+	for _, lambda := range config.Lambdas {
+		buildPaths = append(buildPaths, "./"+lambda.Path)
 	}
 
 	_, err := b.Cmd.Exec(&runcmd.ExecParams{
@@ -114,7 +114,7 @@ func (b *LambdaBuilder) buildDependencies(config *lambgofile.Config) error {
 type builderParams struct {
 	*sharedBuilderParams
 
-	buildPath string
+	lambda *lambgofile.Lambda
 }
 
 func (b *LambdaBuilder) launchBuilder(ch chan *builderParams) {
@@ -134,22 +134,22 @@ type sharedBuilderParams struct {
 func (b *LambdaBuilder) buildBinaryAsync(params *builderParams) {
 	defer params.wg.Done()
 
-	if err := b.buildBinary(params.config, params.buildPath); err != nil {
+	if err := b.buildBinary(params.config, params.lambda); err != nil {
 		params.errorsMu.Lock()
 		defer params.errorsMu.Unlock()
 		params.errors = erg.Append(params.errors, err)
 		return
 	}
 
-	b.Logger.Printf(" - Built: '%s' -> '%s.zip'\n", params.buildPath, buildOutPath(params.config, params.buildPath))
+	b.Logger.Printf(" - Built: '%s' -> '%s.zip'\n", params.lambda.Path, buildOutPath(params.config, params.lambda.Path))
 }
 
-func (b *LambdaBuilder) buildBinary(config *lambgofile.Config, buildPath string) error {
-	outPath := buildOutPath(config, buildPath)
+func (b *LambdaBuilder) buildBinary(config *lambgofile.Config, lambda *lambgofile.Lambda) error {
+	outPath := buildOutPath(config, lambda.Path)
 
 	fullArgs := []string{"build", "-trimpath", "-o", outPath}
-	fullArgs = append(fullArgs, config.BuildFlags...)
-	fullArgs = append(fullArgs, "./"+buildPath)
+	fullArgs = append(fullArgs, lambda.BuildFlags...)
+	fullArgs = append(fullArgs, "./"+lambda.Path)
 
 	_, err := b.Cmd.Exec(&runcmd.ExecParams{
 		PWD:  config.RootPath,
@@ -160,7 +160,7 @@ func (b *LambdaBuilder) buildBinary(config *lambgofile.Config, buildPath string)
 	})
 	if err != nil {
 		return erk.WrapWith(ErrGoBuildFailed, err, erk.Params{
-			"buildPath": buildPath,
+			"buildPath": lambda.Path,
 		})
 	}
 
@@ -171,7 +171,7 @@ func (b *LambdaBuilder) buildBinary(config *lambgofile.Config, buildPath string)
 
 	if err := b.Zip.ZipFile(outPath, zippedFileName); err != nil {
 		return erk.WrapWith(ErrZipFailed, err, erk.Params{
-			"buildPath": buildPath,
+			"buildPath": lambda.Path,
 		})
 	}
 
