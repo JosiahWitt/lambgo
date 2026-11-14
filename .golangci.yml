@@ -9,6 +9,8 @@ linters:
     - wrapcheck
     - godox
     - exhaustruct
+    - exhaustruct_v5
+    - gomodguard
     - varnamelen
     - depguard
     - noctx
@@ -18,6 +20,9 @@ linters:
     - wsl_v5
 
   settings:
+    goconst:
+      ignore-map-keys: true
+
     lll:
       line-length: 160
 
