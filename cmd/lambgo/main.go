@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime/debug"
+	"strings"
 
 	"github.com/JosiahWitt/lambgo/internal/builder"
 	"github.com/JosiahWitt/lambgo/internal/cmd"
@@ -12,15 +14,9 @@ import (
 	"github.com/JosiahWitt/lambgo/internal/zipper"
 )
 
-// Version of the CLI.
-// Should be tied to the release version.
-//
-//nolint:gochecknoglobals // Allows injecting the version
-var Version = "0.2.0"
-
 func main() {
 	app := cmd.App{
-		Version: Version,
+		Version: getVersion(),
 
 		Getwd:            os.Getwd,
 		LambgoFileLoader: &lambgofile.Loader{FS: os.DirFS("/")},
@@ -35,4 +31,13 @@ func main() {
 		fmt.Printf("ERROR: %v\n", err) //nolint:forbidigo // Allow printing error messages
 		os.Exit(1)
 	}
+}
+
+func getVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok || info.Main.Version == "" {
+		return "unknown"
+	}
+
+	return strings.TrimPrefix(info.Main.Version, "v")
 }
