@@ -9,7 +9,7 @@ import (
 	"github.com/JosiahWitt/ensure/ensuring"
 	"github.com/JosiahWitt/lambgo/internal/lambgofile"
 	"github.com/JosiahWitt/lambgo/internal/mocks/io/mock_fs"
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 )
 
 func TestLoadConfig(t *testing.T) {

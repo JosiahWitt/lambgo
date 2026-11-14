@@ -5,7 +5,8 @@
 package mock_zipper
 
 import (
-	"github.com/golang/mock/gomock"
+	"github.com/kr/pretty"
+	"go.uber.org/mock/gomock"
 	"reflect"
 )
 
@@ -40,7 +41,7 @@ func (m *MockZipAPI) EXPECT() *MockZipAPIMockRecorder {
 // ZipFile mocks ZipFile on ZipAPI.
 func (m *MockZipAPI) ZipFile(_path string, _zippedFileName string) error {
 	m.ctrl.T.Helper()
-	inputs := []interface{}{_path, _zippedFileName}
+	inputs := []any{_path, _zippedFileName}
 	ret := m.ctrl.Call(m, "ZipFile", inputs...)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -57,8 +58,35 @@ func (m *MockZipAPI) ZipFile(_path string, _zippedFileName string) error {
 // Outputs:
 //
 //	error
-func (mr *MockZipAPIMockRecorder) ZipFile(_path interface{}, _zippedFileName interface{}) *gomock.Call {
+func (mr *MockZipAPIMockRecorder) ZipFile(_path any, _zippedFileName any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	inputs := []interface{}{_path, _zippedFileName}
+	inputs := []any{wrapMatcher(_path), wrapMatcher(_zippedFileName)}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZipFile", reflect.TypeOf((*MockZipAPI)(nil).ZipFile), inputs...)
+}
+
+func wrapMatcher(input any) gomock.Matcher {
+	if matcher, ok := input.(gomock.Matcher); ok {
+		return matcher
+	}
+
+	var assertionMatcher gomock.Matcher
+	if input == nil {
+		assertionMatcher = gomock.Nil()
+	} else {
+		assertionMatcher = gomock.Eq(input)
+	}
+
+	matcher := gomock.WantFormatter(
+		gomock.StringerFunc(func() string {
+			return pretty.Sprint(input)
+		}),
+		assertionMatcher,
+	)
+
+	return gomock.GotFormatterAdapter(
+		gomock.GotFormatterFunc(func(got any) string {
+			return pretty.Sprint(got)
+		}),
+		matcher,
+	)
 }

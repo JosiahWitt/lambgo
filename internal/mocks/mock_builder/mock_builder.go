@@ -6,7 +6,8 @@ package mock_builder
 
 import (
 	"github.com/JosiahWitt/lambgo/internal/lambgofile"
-	"github.com/golang/mock/gomock"
+	"github.com/kr/pretty"
+	"go.uber.org/mock/gomock"
 	"reflect"
 )
 
@@ -41,7 +42,7 @@ func (m *MockLambdaBuilderAPI) EXPECT() *MockLambdaBuilderAPIMockRecorder {
 // BuildBinaries mocks BuildBinaries on LambdaBuilderAPI.
 func (m *MockLambdaBuilderAPI) BuildBinaries(_config *lambgofile.Config) error {
 	m.ctrl.T.Helper()
-	inputs := []interface{}{_config}
+	inputs := []any{_config}
 	ret := m.ctrl.Call(m, "BuildBinaries", inputs...)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -57,8 +58,35 @@ func (m *MockLambdaBuilderAPI) BuildBinaries(_config *lambgofile.Config) error {
 // Outputs:
 //
 //	error
-func (mr *MockLambdaBuilderAPIMockRecorder) BuildBinaries(_config interface{}) *gomock.Call {
+func (mr *MockLambdaBuilderAPIMockRecorder) BuildBinaries(_config any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	inputs := []interface{}{_config}
+	inputs := []any{wrapMatcher(_config)}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildBinaries", reflect.TypeOf((*MockLambdaBuilderAPI)(nil).BuildBinaries), inputs...)
+}
+
+func wrapMatcher(input any) gomock.Matcher {
+	if matcher, ok := input.(gomock.Matcher); ok {
+		return matcher
+	}
+
+	var assertionMatcher gomock.Matcher
+	if input == nil {
+		assertionMatcher = gomock.Nil()
+	} else {
+		assertionMatcher = gomock.Eq(input)
+	}
+
+	matcher := gomock.WantFormatter(
+		gomock.StringerFunc(func() string {
+			return pretty.Sprint(input)
+		}),
+		assertionMatcher,
+	)
+
+	return gomock.GotFormatterAdapter(
+		gomock.GotFormatterFunc(func(got any) string {
+			return pretty.Sprint(got)
+		}),
+		matcher,
+	)
 }

@@ -6,7 +6,8 @@ package mock_runcmd
 
 import (
 	"github.com/JosiahWitt/lambgo/internal/runcmd"
-	"github.com/golang/mock/gomock"
+	"github.com/kr/pretty"
+	"go.uber.org/mock/gomock"
 	"reflect"
 )
 
@@ -41,7 +42,7 @@ func (m *MockRunnerAPI) EXPECT() *MockRunnerAPIMockRecorder {
 // Exec mocks Exec on RunnerAPI.
 func (m *MockRunnerAPI) Exec(_params *runcmd.ExecParams) (string, error) {
 	m.ctrl.T.Helper()
-	inputs := []interface{}{_params}
+	inputs := []any{_params}
 	ret := m.ctrl.Call(m, "Exec", inputs...)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
@@ -59,8 +60,35 @@ func (m *MockRunnerAPI) Exec(_params *runcmd.ExecParams) (string, error) {
 //
 //	string
 //	error
-func (mr *MockRunnerAPIMockRecorder) Exec(_params interface{}) *gomock.Call {
+func (mr *MockRunnerAPIMockRecorder) Exec(_params any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	inputs := []interface{}{_params}
+	inputs := []any{wrapMatcher(_params)}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockRunnerAPI)(nil).Exec), inputs...)
+}
+
+func wrapMatcher(input any) gomock.Matcher {
+	if matcher, ok := input.(gomock.Matcher); ok {
+		return matcher
+	}
+
+	var assertionMatcher gomock.Matcher
+	if input == nil {
+		assertionMatcher = gomock.Nil()
+	} else {
+		assertionMatcher = gomock.Eq(input)
+	}
+
+	matcher := gomock.WantFormatter(
+		gomock.StringerFunc(func() string {
+			return pretty.Sprint(input)
+		}),
+		assertionMatcher,
+	)
+
+	return gomock.GotFormatterAdapter(
+		gomock.GotFormatterFunc(func(got any) string {
+			return pretty.Sprint(got)
+		}),
+		matcher,
+	)
 }
