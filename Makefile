@@ -1,5 +1,5 @@
 install-tools:
-	go install github.com/JosiahWitt/ensure/cmd/ensure@v0.2.0
+	go install github.com/JosiahWitt/ensure/cmd/ensure@v0.6.5
 
 generate-mocks:
 	ensure mocks generate

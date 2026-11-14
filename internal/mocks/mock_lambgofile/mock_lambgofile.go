@@ -6,7 +6,8 @@ package mock_lambgofile
 
 import (
 	"github.com/JosiahWitt/lambgo/internal/lambgofile"
-	"github.com/golang/mock/gomock"
+	"github.com/kr/pretty"
+	"go.uber.org/mock/gomock"
 	"reflect"
 )
 
@@ -41,7 +42,7 @@ func (m *MockLoaderAPI) EXPECT() *MockLoaderAPIMockRecorder {
 // LoadConfig mocks LoadConfig on LoaderAPI.
 func (m *MockLoaderAPI) LoadConfig(_pwd string) (*lambgofile.Config, error) {
 	m.ctrl.T.Helper()
-	inputs := []interface{}{_pwd}
+	inputs := []any{_pwd}
 	ret := m.ctrl.Call(m, "LoadConfig", inputs...)
 	ret0, _ := ret[0].(*lambgofile.Config)
 	ret1, _ := ret[1].(error)
@@ -59,8 +60,35 @@ func (m *MockLoaderAPI) LoadConfig(_pwd string) (*lambgofile.Config, error) {
 //
 //	*lambgofile.Config
 //	error
-func (mr *MockLoaderAPIMockRecorder) LoadConfig(_pwd interface{}) *gomock.Call {
+func (mr *MockLoaderAPIMockRecorder) LoadConfig(_pwd any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	inputs := []interface{}{_pwd}
+	inputs := []any{wrapMatcher(_pwd)}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadConfig", reflect.TypeOf((*MockLoaderAPI)(nil).LoadConfig), inputs...)
+}
+
+func wrapMatcher(input any) gomock.Matcher {
+	if matcher, ok := input.(gomock.Matcher); ok {
+		return matcher
+	}
+
+	var assertionMatcher gomock.Matcher
+	if input == nil {
+		assertionMatcher = gomock.Nil()
+	} else {
+		assertionMatcher = gomock.Eq(input)
+	}
+
+	matcher := gomock.WantFormatter(
+		gomock.StringerFunc(func() string {
+			return pretty.Sprint(input)
+		}),
+		assertionMatcher,
+	)
+
+	return gomock.GotFormatterAdapter(
+		gomock.GotFormatterFunc(func(got any) string {
+			return pretty.Sprint(got)
+		}),
+		matcher,
+	)
 }
